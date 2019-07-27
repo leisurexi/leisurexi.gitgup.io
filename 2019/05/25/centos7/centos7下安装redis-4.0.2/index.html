@@ -6,19 +6,29 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <link rel="dns-prefetch" href="https://github.com/leisurexi">
-  <title>Archives: 2019/7 | leisurexi&#39;s Blog</title>
+  <title>centos7下安装redis-4.0.2 | leisurexi&#39;s Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="Life was like a box of chocolate ，you never know what you are gonna get.">
-<meta name="keywords" content="程序猿">
-<meta property="og:type" content="website">
-<meta property="og:title" content="leisurexi&#39;s Blog">
-<meta property="og:url" content="https://github.com/leisurexi/archives/2019/07/index.html">
+  <meta name="description" content="本篇文章主要介绍在centos7 环境下安装redis-4.0.2。">
+<meta name="keywords" content="centos7">
+<meta property="og:type" content="article">
+<meta property="og:title" content="centos7下安装redis-4.0.2">
+<meta property="og:url" content="https://github.com/leisurexi/2019/05/25/centos7/centos7下安装redis-4.0.2/index.html">
 <meta property="og:site_name" content="leisurexi&#39;s Blog">
-<meta property="og:description" content="Life was like a box of chocolate ，you never know what you are gonna get.">
+<meta property="og:description" content="本篇文章主要介绍在centos7 环境下安装redis-4.0.2。">
 <meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://img2018.cnblogs.com/blog/1370263/201905/1370263-20190511115128685-1603603344.png">
+<meta property="og:image" content="https://img2018.cnblogs.com/blog/1370263/201905/1370263-20190511112634130-34991634.png">
+<meta property="og:image" content="https://img2018.cnblogs.com/blog/1370263/201905/1370263-20190511112756895-1137615138.png">
+<meta property="og:image" content="https://img2018.cnblogs.com/blog/1370263/201905/1370263-20190511112856950-553024100.png">
+<meta property="og:image" content="https://img2018.cnblogs.com/blog/1370263/201905/1370263-20190511115747695-1561272707.png">
+<meta property="og:image" content="https://img2018.cnblogs.com/blog/1370263/201905/1370263-20190511115902489-1933425300.png">
+<meta property="og:image" content="https://img2018.cnblogs.com/blog/1370263/201905/1370263-20190511120205662-777942547.png">
+<meta property="og:image" content="https://img2018.cnblogs.com/blog/1370263/201905/1370263-20190511120225502-11679504.png">
+<meta property="og:updated_time" content="2019-07-27T09:34:42.001Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="leisurexi&#39;s Blog">
-<meta name="twitter:description" content="Life was like a box of chocolate ，you never know what you are gonna get.">
+<meta name="twitter:title" content="centos7下安装redis-4.0.2">
+<meta name="twitter:description" content="本篇文章主要介绍在centos7 环境下安装redis-4.0.2。">
+<meta name="twitter:image" content="https://img2018.cnblogs.com/blog/1370263/201905/1370263-20190511115128685-1603603344.png">
   
     <link rel="alternative" href="/atom.xml" title="leisurexi&#39;s Blog" type="application/atom+xml">
   
@@ -47,7 +57,7 @@
 <div class="intrude-less">
 	<header id="header" class="inner">
 		<a href="/" class="profilepic">
-			<img src="http://prnofs3w4.bkt.clouddn.com/head2.jpg" class="js-avatar">
+			<img src="http://ww1.sinaimg.cn/large/0060rcQCly1g5ej8n7tqcj30hs0hs74i.jpg" class="js-avatar">
 		</a>
 		<hgroup>
 		  <h1 class="header-author"><a href="/">leisurexi</a></h1>
@@ -59,7 +69,7 @@
 			
 				<li><a href="/">主页</a></li>
 	        
-				<li><a href="/tags/随笔/">随笔</a></li>
+				<li><a href="/tags/">随笔</a></li>
 	        
 			</ul>
 		</nav>
@@ -67,10 +77,6 @@
     		
     			
     			<a q-on="click: openSlider(e, 'innerArchive')" href="javascript:void(0)">所有文章</a>
-    			
-            
-    			
-    			<a q-on="click: openSlider(e, 'friends')" href="javascript:void(0)">友链</a>
     			
             
     			
@@ -105,7 +111,7 @@
 	<div class="intrude-less">
 		<header id="header" class="inner">
 			<div class="profilepic">
-				<img src="http://prnofs3w4.bkt.clouddn.com/head2.jpg" class="js-avatar">
+				<img src="http://ww1.sinaimg.cn/large/0060rcQCly1g5ej8n7tqcj30hs0hs74i.jpg" class="js-avatar">
 			</div>
 			<hgroup>
 			  <h1 class="header-author js-header-author">leisurexi</h1>
@@ -139,7 +145,7 @@
 				
 					<li style="width: 50%"><a href="/">主页</a></li>
 		        
-					<li style="width: 50%"><a href="/tags/随笔/">随笔</a></li>
+					<li style="width: 50%"><a href="/tags/">随笔</a></li>
 		        
 				</ul>
 			</nav>
@@ -154,76 +160,262 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-centos7/centos7下安装redis-4.0.2" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2019" class="archive-year">2019</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/07/27/test-my-site/" class="archive-article-date">
-  	<time datetime="2019-07-27T08:09:21.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-07-27</time>
-</a>
-        </div>
-    	 
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/07/27/test-my-site/">test_my_site</a>
+    <h1 class="article-title" itemprop="name">
+      centos7下安装redis-4.0.2
     </h1>
   
 
-        <div class="article-info info-on-right">
-          
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/07/27/hello-world/" class="archive-article-date">
-  	<time datetime="2019-07-27T07:55:12.680Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-07-27</time>
+        
+        <a href="/2019/05/25/centos7/centos7下安装redis-4.0.2/" class="archive-article-date">
+  	<time datetime="2019-05-25T11:20:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-05-25</time>
 </a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/07/27/hello-world/">Hello World</a>
-    </h1>
-  
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>本篇文章主要介绍在centos7 环境下安装redis-4.0.2。</p>
+<a id="more"></a>
 
-        <div class="article-info info-on-right">
-          
-          
+<h1 id="下载redis安装包"><a href="#下载redis安装包" class="headerlink" title="下载redis安装包"></a>下载redis安装包</h1><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wget http://download.redis.io/releases/redis-4.0.2.tar.gz</span><br></pre></td></tr></table></figure>
 
+<p>如果提示以下信息先用yum安装wget(yum install wget)</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-bash: wget: command not found</span><br></pre></td></tr></table></figure>
+
+<h1 id="解压安装包"><a href="#解压安装包" class="headerlink" title="解压安装包"></a>解压安装包</h1><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tar -zxvf redis-4.0.2.tar.gz</span><br></pre></td></tr></table></figure>
+
+<p>重命名</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mv redis-4.0.2 redis</span><br></pre></td></tr></table></figure>
+
+<h1 id="编译"><a href="#编译" class="headerlink" title="编译"></a>编译</h1><p>编译前需要安装gcc(yum install gcc)，然后进入redis文件夹，直接执行make命令进行编译</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cd redis</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">make</span><br></pre></td></tr></table></figure>
+
+<p>如果提示下图的错误执行  <strong>make MALLOC=libc 命令</strong>  </p>
+<p>关于错误说明解释：关于分配器allocator， 如果有MALLOC  这个 环境变量， 会有用这个环境变量的 去建立Redis。</p>
+<p>而且libc 并不是默认的 分配器， 默认的是 jemalloc, 因为 jemalloc 被证明 有更少的 fragmentation problems 比libc。</p>
+<p>但是如果你又没有jemalloc 而只有 libc 当然 make 出错。 所以加这么一个参数。</p>
+<p><img src="https://img2018.cnblogs.com/blog/1370263/201905/1370263-20190511115128685-1603603344.png" alt></p>
+<h1 id="修改配置文件"><a href="#修改配置文件" class="headerlink" title="修改配置文件"></a>修改配置文件</h1><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vim redis.conf</span><br></pre></td></tr></table></figure>
+
+<p>如果提示未找到vim命令，请先用yum安装(yum install vim)，或者使用<strong>vi redis.conf</strong>。</p>
+<p><img src="https://img2018.cnblogs.com/blog/1370263/201905/1370263-20190511112634130-34991634.png" alt></p>
+<p>首先将图中的地方改为下图这样</p>
+<p><img src="https://img2018.cnblogs.com/blog/1370263/201905/1370263-20190511112756895-1137615138.png" alt></p>
+<p>这样可以让redis从外部访问。</p>
+<p>接着把下图中的配置改为yes，改为yes后是以守护进程的方式启动。</p>
+<p><img src="https://img2018.cnblogs.com/blog/1370263/201905/1370263-20190511112856950-553024100.png" alt></p>
+<p>接下来配置redis日志文件生成的地址和名字，将配置改为下图这样，具体的路径可以根据自己的需要更换。</p>
+<p><img src="https://img2018.cnblogs.com/blog/1370263/201905/1370263-20190511115747695-1561272707.png" alt></p>
+<p>将redis-server和redis-cli拷贝至/usr/local/bin目录下</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cp redis-server /usr/local/bin</span><br><span class="line">cp redis-cli /usr/local/bin</span><br></pre></td></tr></table></figure>
+
+<h1 id="启动redis"><a href="#启动redis" class="headerlink" title="启动redis"></a>启动redis</h1><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">redis-server /opt/redis/redis.conf</span><br></pre></td></tr></table></figure>
+
+<p>查看redis进程</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ps -ef  | grep redis</span><br></pre></td></tr></table></figure>
+
+<p>如果和下图一样就代表你成功啦！</p>
+<p><img src="https://img2018.cnblogs.com/blog/1370263/201905/1370263-20190511115902489-1933425300.png" alt></p>
+<p>最后我们用redis-cli去连接一下，执行几个命令，验证是否真的可用。</p>
+<p>首先连接redis，默认执行以下命令会连接本机6379端口，如果redis端口不是6379的话，可以像这样去连接 <strong>redis-cli -p 你的端口地址</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">redis-cli</span><br></pre></td></tr></table></figure>
+
+<p>然后我们执行一个set 和 get命令看看效果。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">set hello world</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://img2018.cnblogs.com/blog/1370263/201905/1370263-20190511120205662-777942547.png" alt></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">get hello</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://img2018.cnblogs.com/blog/1370263/201905/1370263-20190511120225502-11679504.png" alt></p>
+<p>可以看到完全是ok的。</p>
+
+      
+
+      
+        <div class="page-reward">
+          <a href="javascript:;" class="page-reward-btn tooltip-top">
+            <div class="tooltip tooltip-east">
+            <span class="tooltip-item">
+              赏
+            </span>
+            <span class="tooltip-content">
+              <span class="tooltip-text">
+                <span class="tooltip-inner">
+                  <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃糖果<i class="icon icon-quo-right"></i></p>
+                  <div class="reward-box">
+                    
+                    
+                  </div>
+                </span>
+              </span>
+            </span>
+          </div>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">centos7</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
+        </div>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=https://github.com/leisurexi/2019/05/25/centos7/centos7下安装redis-4.0.2/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
+  
+<nav id="article-nav">
+  
+    <a href="/2019/05/26/设计模式/迭代器模式/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          迭代器模式
+        
+      </div>
+    </a>
   
   
-    </div></section>
+    <a href="/2019/05/18/集合/Collection/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">Collection</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+  
+  <div class="duoshuo">
+	<!-- 多说评论框 start -->
+	<div class="ds-thread" data-thread-key="centos7/centos7下安装redis-4.0.2" data-title="centos7下安装redis-4.0.2" data-url="https://github.com/leisurexi/2019/05/25/centos7/centos7下安装redis-4.0.2/"></div>
+	<!-- 多说评论框 end -->
+	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+	<script type="text/javascript">
+	var duoshuoQuery = {short_name:"true"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+	<!-- 多说公共JS代码 end -->
+</div>
+
+  
+  
+  
+  <div id="cloud-tie-wrapper" class="cloud-tie-wrapper"></div>
+<script>
+  var cloudTieConfig = {
+    url: "https://github.com/leisurexi/2019/05/25/centos7/centos7下安装redis-4.0.2/", 
+    sourceId: "centos7/centos7下安装redis-4.0.2",
+    productKey: "true",
+    target: "cloud-tie-wrapper"
+  };
+</script>
+<script src="//img1.cache.netease.com/f2e/tie/yun/sdk/loader.js"></script>
   
 
-    
+  
+
+  
+
+  
 
 
           </div>
@@ -246,8 +438,8 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false,
@@ -277,25 +469,17 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
       
       
     
-      
-      
-      
-    
     
 
     <ul style="width: 70%">
     
     
       
-      <li style="width: 33.333333333333336%" q-on="click: openSlider(e, 'innerArchive')"><a href="javascript:void(0)" q-class="active:innerArchive">所有文章</a></li>
+      <li style="width: 50%" q-on="click: openSlider(e, 'innerArchive')"><a href="javascript:void(0)" q-class="active:innerArchive">所有文章</a></li>
       
         
       
-      <li style="width: 33.333333333333336%" q-on="click: openSlider(e, 'friends')"><a href="javascript:void(0)" q-class="active:friends">友链</a></li>
-      
-        
-      
-      <li style="width: 33.333333333333336%" q-on="click: openSlider(e, 'aboutme')"><a href="javascript:void(0)" q-class="active:aboutme">关于我</a></li>
+      <li style="width: 50%" q-on="click: openSlider(e, 'aboutme')"><a href="javascript:void(0)" q-class="active:aboutme">关于我</a></li>
       
         
     </ul>
@@ -314,6 +498,18 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
             <input type="checkbox" q-on="click:toggleTag(e)" q-attr="checked:showTags">
           </label>
           <ul class="article-tag-list" q-show="showTags">
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">centos7</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">设计模式</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">集合</a>
+              </li>
             
             <div class="clearfix"></div>
           </ul>
@@ -358,38 +554,6 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
     	</section>
     
 
-    
-    	<section class="tools-section tools-section-friends" q-show="friends">
-  		
-        <ul class="search-ul">
-          
-            <li class="search-li">
-              <a href="http://localhost:4000/" target="_blank" class="search-title"><i class="icon-quo-left icon"></i>友情链接1</a>
-            </li>
-          
-            <li class="search-li">
-              <a href="http://localhost:4000/" target="_blank" class="search-title"><i class="icon-quo-left icon"></i>友情链接2</a>
-            </li>
-          
-            <li class="search-li">
-              <a href="http://localhost:4000/" target="_blank" class="search-title"><i class="icon-quo-left icon"></i>友情链接3</a>
-            </li>
-          
-            <li class="search-li">
-              <a href="http://localhost:4000/" target="_blank" class="search-title"><i class="icon-quo-left icon"></i>友情链接4</a>
-            </li>
-          
-            <li class="search-li">
-              <a href="http://localhost:4000/" target="_blank" class="search-title"><i class="icon-quo-left icon"></i>友情链接5</a>
-            </li>
-          
-            <li class="search-li">
-              <a href="http://localhost:4000/" target="_blank" class="search-title"><i class="icon-quo-left icon"></i>友情链接6</a>
-            </li>
-          
-        </ul>
-  		
-    	</section>
     
 
     
