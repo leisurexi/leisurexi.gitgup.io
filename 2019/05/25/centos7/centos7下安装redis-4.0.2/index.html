@@ -385,29 +385,25 @@
   
 
   
-
-
-
-  <div id="gitalk-container" style="padding: 0px 30px 0px 30px;"></div> 
-
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
-<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
-<script type="text/javascript">
-
-if(true){
-	var gitalk = new Gitalk({
-  	clientID: '73874b85213728969ae5',
-  	clientSecret: 'ebb4ad3555764078a60115d1f22aba37ebb9411b',
-  	repo: 'comments',
-  	owner: 'leisurexi',
-  	admin: ['leisurexi'],
-  	id: 'Sat May 25 2019 19:20:00 GMT+0800',
-  	distractionFreeMode: 'true'
+  <div id="gitment-ctn"></div> 
+<link rel="stylesheet" href="https://jjeejj.github.io/css/gitment.css">
+<script src="https://jjeejj.github.io/js/gitment.js"></script>
+<script>
+var gitment = new Gitment({
+  id: "Sat May 25 2019 19:20:00 GMT+0800",
+  owner: 'leisurexi',
+  repo: 'comments',
+  oauth: {
+    client_id: '73874b85213728969ae5',
+    client_secret: 'ebb4ad3555764078a60115d1f22aba37ebb9411b',
+  },
 })
-gitalk.render('gitalk-container') 
-}
+gitment.render('gitment-ctn')
 </script>
   
+
+
+
 
           </div>
         </div>
