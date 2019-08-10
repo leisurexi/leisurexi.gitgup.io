@@ -16,7 +16,7 @@
 <meta property="og:site_name" content="leisurexi&#39;s Blog">
 <meta property="og:description" content="本篇文章主要介绍在centos7 环境下安装RabbitMQ 3.7。">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2019-08-10T02:36:11.257Z">
+<meta property="og:updated_time" content="2019-08-10T02:44:08.776Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="CentOS 7下安装RabbitMQ 3.7">
 <meta name="twitter:description" content="本篇文章主要介绍在centos7 环境下安装RabbitMQ 3.7。">
@@ -178,15 +178,12 @@
         <p>本篇文章主要介绍在centos7 环境下安装RabbitMQ 3.7。</p>
 <a id="more"></a>
 
-<h1 id="首先安装Erlang20-2"><a href="#首先安装Erlang20-2" class="headerlink" title="首先安装Erlang20.2"></a>首先安装Erlang20.2</h1><ol>
-<li><p>安装准备</p>
-<ul>
+<h1 id="首先安装Erlang20-2"><a href="#首先安装Erlang20-2" class="headerlink" title="首先安装Erlang20.2"></a>首先安装Erlang20.2</h1><h2 id="安装准备"><a href="#安装准备" class="headerlink" title="安装准备"></a>安装准备</h2><ul>
 <li>创建Yum源</li>
 </ul>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">#创建yum源</span><br><span class="line">vi /etc/yum.repos.d/rabbitmq-erlang.repo</span><br><span class="line"></span><br><span class="line">#文件内容</span><br><span class="line"># In /etc/yum.repos.d/rabbitmq-erlang.repo</span><br><span class="line">[rabbitmq-erlang]</span><br><span class="line">name=rabbitmq-erlang</span><br><span class="line">baseurl=https:<span class="comment">//dl.bintray.com/rabbitmq-erlang/rpm/erlang/20/el/6</span></span><br><span class="line">gpgcheck=<span class="number">1</span></span><br><span class="line">gpgkey=https:<span class="comment">//dl.bintray.com/rabbitmq/Keys/rabbitmq-release-signing-key.asc</span></span><br><span class="line">repo_gpgcheck=<span class="number">0</span></span><br><span class="line">enabled=<span class="number">1</span></span><br></pre></td></tr></table></figure>
-</li>
-<li><p>Erlang安装</p>
-<ul>
+
+<h2 id="Erlang安装"><a href="#Erlang安装" class="headerlink" title="Erlang安装"></a>Erlang安装</h2><ul>
 <li>安装</li>
 </ul>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install erlang</span><br></pre></td></tr></table></figure>
@@ -196,17 +193,12 @@
 </ul>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">#进入erlang命令行表示成功</span><br><span class="line">erl</span><br></pre></td></tr></table></figure>
 
-</li>
-</ol>
-<h1 id="RabbitMQ安装"><a href="#RabbitMQ安装" class="headerlink" title="RabbitMQ安装"></a>RabbitMQ安装</h1><ol>
-<li><p>安装准备</p>
-<ul>
+<h1 id="RabbitMQ安装"><a href="#RabbitMQ安装" class="headerlink" title="RabbitMQ安装"></a>RabbitMQ安装</h1><h2 id="安装准备-1"><a href="#安装准备-1" class="headerlink" title="安装准备"></a>安装准备</h2><ul>
 <li>安装 socat</li>
 </ul>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install socat</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>安装并启动</p>
-<ul>
+
+<h2 id="安装并启动"><a href="#安装并启动" class="headerlink" title="安装并启动"></a>安装并启动</h2><ul>
 <li>RPM安装</li>
 </ul>
 <p>官网下载地址：<a href="https://www.rabbitmq.com/install-rpm.html" target="_blank" rel="noopener">https://www.rabbitmq.com/install-rpm.html</a></p>
@@ -217,18 +209,17 @@
 </ul>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">#启动服务</span><br><span class="line">systemctl start rabbitmq-server</span><br><span class="line"></span><br><span class="line">#查看状态</span><br><span class="line">systemctl status rabbitmq-server</span><br><span class="line"></span><br><span class="line">#设置为开机启动</span><br><span class="line">systemctl enable rabbitmq-server</span><br></pre></td></tr></table></figure>
 
-</li>
-</ol>
-<h1 id="RabbitMQ配置"><a href="#RabbitMQ配置" class="headerlink" title="RabbitMQ配置"></a>RabbitMQ配置</h1><ol>
-<li><p>添加用户并授权</p>
+<h1 id="RabbitMQ配置"><a href="#RabbitMQ配置" class="headerlink" title="RabbitMQ配置"></a>RabbitMQ配置</h1><ul>
+<li>添加用户并授权</li>
+</ul>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">添加用户</span><br><span class="line">rabbitmqctl add_user root root</span><br><span class="line"></span><br><span class="line">#设置用户角色</span><br><span class="line">rabbitmqctl set_user_tags admin administrator</span><br><span class="line"></span><br><span class="line">#设置用户权限(接受来自所有Host的所有操作)</span><br><span class="line">rabbitmqctl  set_permissions -p <span class="string">"/"</span> root <span class="string">'.*'</span> <span class="string">'.*'</span> <span class="string">'.*'</span>  </span><br><span class="line"></span><br><span class="line">#查看用户权限</span><br><span class="line">rabbitmqctl list_user_permissions root</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>启用web管理后台插件</p>
+
+<ul>
+<li>启用web管理后台插件</li>
+</ul>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rabbitmq-plugins enable  rabbitmq_management</span><br></pre></td></tr></table></figure>
 
 <p>然后就可以用刚才创建的root账户登录。</p>
-</li>
-</ol>
 <h1 id="RabbitMQ-常用命令"><a href="#RabbitMQ-常用命令" class="headerlink" title="RabbitMQ 常用命令"></a>RabbitMQ 常用命令</h1><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"># 添加用户</span><br><span class="line">rabbitmqctl add_user &lt;username&gt; &lt;password&gt;  </span><br><span class="line"></span><br><span class="line"># 删除用户</span><br><span class="line">rabbitmqctl delete_user &lt;username&gt;  </span><br><span class="line"></span><br><span class="line"># 修改用户密码</span><br><span class="line">rabbitmqctl change_password &lt;username&gt; &lt;newpassword&gt;  </span><br><span class="line"></span><br><span class="line"># 清除用户密码（该用户将不能使用密码登陆，但是可以通过SASL登陆如果配置了SASL认证）</span><br><span class="line">rabbitmqctl clear_password &lt;username&gt; </span><br><span class="line"></span><br><span class="line"># 设置用户tags（相当于角色，包含administrator，monitoring，policymaker，management）</span><br><span class="line">rabbitmqctl set_user_tags &lt;username&gt; &lt;tag&gt;</span><br><span class="line"></span><br><span class="line"># 列出所有用户</span><br><span class="line">rabbitmqctl list_users  </span><br><span class="line"></span><br><span class="line"># 创建一个vhosts</span><br><span class="line">rabbitmqctl add_vhost &lt;vhostpath&gt;  </span><br><span class="line"></span><br><span class="line"># 删除一个vhosts</span><br><span class="line">rabbitmqctl delete_vhost &lt;vhostpath&gt;  </span><br><span class="line"></span><br><span class="line"># 列出vhosts</span><br><span class="line">rabbitmqctl list_vhosts [&lt;vhostinfoitem&gt; ...]  </span><br><span class="line"></span><br><span class="line"># 针对一个vhosts给用户赋予相关权限；</span><br><span class="line">rabbitmqctl set_permissions [-p &lt;vhostpath&gt;] &lt;user&gt; &lt;conf&gt; &lt;write&gt; &lt;read&gt;  </span><br><span class="line"></span><br><span class="line"># 清除一个用户对vhosts的权限；</span><br><span class="line">rabbitmqctl clear_permissions [-p &lt;vhostpath&gt;] &lt;username&gt;  </span><br><span class="line"></span><br><span class="line"># 列出哪些用户可以访问该vhosts；</span><br><span class="line">rabbitmqctl list_permissions [-p &lt;vhostpath&gt;]   </span><br><span class="line"></span><br><span class="line"># 列出用户访问权限；</span><br><span class="line">rabbitmqctl list_user_permissions &lt;username&gt;</span><br></pre></td></tr></table></figure>
 
 <h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><p><a href="https://ken.io/note/centos7-rabbitmq-install-setup" target="_blank" rel="noopener">https://ken.io/note/centos7-rabbitmq-install-setup</a></p>
