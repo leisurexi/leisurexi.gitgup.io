@@ -16,7 +16,7 @@
 <meta property="og:site_name" content="leisurexi&#39;s Blog">
 <meta property="og:description" content="本篇文章主要介绍在CentOS 7环境下安装RabbitMQ 3.7。">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2019-08-10T02:46:13.407Z">
+<meta property="og:updated_time" content="2019-08-10T06:40:32.789Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="CentOS 7下安装RabbitMQ 3.7">
 <meta name="twitter:description" content="本篇文章主要介绍在CentOS 7环境下安装RabbitMQ 3.7。">
@@ -212,7 +212,7 @@
 <h1 id="RabbitMQ配置"><a href="#RabbitMQ配置" class="headerlink" title="RabbitMQ配置"></a>RabbitMQ配置</h1><ul>
 <li>添加用户并授权</li>
 </ul>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">添加用户</span><br><span class="line">rabbitmqctl add_user root root</span><br><span class="line"></span><br><span class="line">#设置用户角色</span><br><span class="line">rabbitmqctl set_user_tags admin administrator</span><br><span class="line"></span><br><span class="line">#设置用户权限(接受来自所有Host的所有操作)</span><br><span class="line">rabbitmqctl  set_permissions -p <span class="string">"/"</span> root <span class="string">'.*'</span> <span class="string">'.*'</span> <span class="string">'.*'</span>  </span><br><span class="line"></span><br><span class="line">#查看用户权限</span><br><span class="line">rabbitmqctl list_user_permissions root</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">添加用户</span><br><span class="line">rabbitmqctl add_user root root</span><br><span class="line"></span><br><span class="line">#设置用户角色</span><br><span class="line">rabbitmqctl set_user_tags root administrator</span><br><span class="line"></span><br><span class="line">#设置用户权限(接受来自所有Host的所有操作)</span><br><span class="line">rabbitmqctl  set_permissions -p <span class="string">"/"</span> root <span class="string">'.*'</span> <span class="string">'.*'</span> <span class="string">'.*'</span>  </span><br><span class="line"></span><br><span class="line">#查看用户权限</span><br><span class="line">rabbitmqctl list_user_permissions root</span><br></pre></td></tr></table></figure>
 
 <ul>
 <li>启用web管理后台插件</li>
