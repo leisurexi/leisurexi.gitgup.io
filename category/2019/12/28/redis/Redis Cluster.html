@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="redis,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="本篇文章主要介绍搭建Redis Cluster集群，并测试其故障转移，集群重新分片。">
+<meta name="keywords" content="redis">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Redis Cluster">
+<meta property="og:url" content="https://github.com/leisurexi/category/2019/12/28/redis/Redis Cluster.html">
+<meta property="og:site_name" content="leisurexi&#39;s Blog">
+<meta property="og:description" content="本篇文章主要介绍搭建Redis Cluster集群，并测试其故障转移，集群重新分片。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://ww1.sinaimg.cn/large/006Vpl27gy1gacrqcxdh7j30ue0cmweg.jpg">
+<meta property="og:image" content="http://ww1.sinaimg.cn/large/006Vpl27gy1gachzcuv7cj30ks06qq3p.jpg">
+<meta property="og:image" content="http://ww1.sinaimg.cn/large/006Vpl27gy1gaci4czr7yj30q607imya.jpg">
+<meta property="og:image" content="http://ww1.sinaimg.cn/large/006Vpl27gy1gacibkqon1j32fy1a87h2.jpg">
+<meta property="og:image" content="http://ww1.sinaimg.cn/large/006Vpl27gy1gacimzjleuj30yq0f040s.jpg">
+<meta property="og:image" content="http://ww1.sinaimg.cn/large/006Vpl27gy1gaciq5811ij31ey09idjw.jpg">
+<meta property="og:image" content="http://ww1.sinaimg.cn/large/006Vpl27gy1gacp7rcwkij31ni01qdgl.jpg">
+<meta property="og:image" content="http://ww1.sinaimg.cn/large/006Vpl27gy1gacp7ytlroj31my01mmxx.jpg">
+<meta property="og:image" content="http://ww1.sinaimg.cn/large/006Vpl27gy1gacpdn4voej31ne01gt9i.jpg">
+<meta property="og:image" content="http://ww1.sinaimg.cn/large/006Vpl27gy1gacpdtjul3j31n201eq3q.jpg">
+<meta property="og:image" content="http://ww1.sinaimg.cn/large/006Vpl27gy1gacqz30vx6j30ny0140st.jpg">
+<meta property="og:image" content="http://ww1.sinaimg.cn/large/006Vpl27gy1gacqzt5yinj30sk014q35.jpg">
+<meta property="og:image" content="http://ww1.sinaimg.cn/large/006Vpl27gy1gacqu80mffj30t203owf2.jpg">
+<meta property="og:image" content="http://ww1.sinaimg.cn/large/006Vpl27gy1gacr1276yvj30qc010q33.jpg">
+<meta property="og:image" content="http://ww1.sinaimg.cn/large/006Vpl27gy1gacr2zwc37j30rc0qsai3.jpg">
+<meta property="og:image" content="http://ww1.sinaimg.cn/large/006Vpl27gy1gacr3vqj3rj31ew09i0wu.jpg">
+<meta property="og:image" content="http://ww1.sinaimg.cn/large/006Vpl27gy1gacraafltqj31f609m0wv.jpg">
+<meta property="og:updated_time" content="2019-12-28T13:58:38.892Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Redis Cluster">
+<meta name="twitter:description" content="本篇文章主要介绍搭建Redis Cluster集群，并测试其故障转移，集群重新分片。">
+<meta name="twitter:image" content="http://ww1.sinaimg.cn/large/006Vpl27gy1gacrqcxdh7j30ue0cmweg.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://github.com/leisurexi/category/2019/12/28/redis/Redis Cluster.html">
+
+
+
+
+
+  <title>Redis Cluster | leisurexi's Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">leisurexi's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">此行一入深似海，从此红尘是路人。</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://github.com/leisurexi/category/2019/12/28/redis/Redis Cluster.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="leisurexi">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="http://ww1.sinaimg.cn/large/0060rcQCly1g5ej8n7tqcj30hs0hs74i.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="leisurexi's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Redis Cluster</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-12-28T21:58:00+08:00">
+                2019-12-28
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/redis/" itemprop="url" rel="index">
+                    <span itemprop="name">redis</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/category/2019/12/28/redis/Redis Cluster.html" class="leancloud_visitors" data-flag-title="Redis Cluster">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">热度&#58;</span>
+               
+                 <span class="leancloud-visitors-count">
+                  <span>℃</span>
+                 </span>
+             </span>
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  5.7k 字
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  22 分钟
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <hr>
+<p>本篇文章主要介绍搭建Redis Cluster集群，并测试其故障转移，集群重新分片。</p>
+<a id="more"></a>
+
+<h1 id="Redis-Cluster"><a href="#Redis-Cluster" class="headerlink" title="Redis Cluster"></a>Redis Cluster</h1><h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>Redis Cluster是Redis的“亲儿子”，它是Redis作者自己提供的Redis集群化方法。</p>
+<p>Redis Cluster提供了一种运行Redis安装的方法，其中数据 <strong>在多个Redis节点之间自动分片</strong>。</p>
+<p>Redis Cluster还在<strong>分区期间</strong>提供<strong>一定程度的可用性</strong>，实际上是在某些节点发生故障或无法通信时继续运行的能力。但是，如果发生较大的故障（例如，当大多数主设备不可用时），集群将停止运行。</p>
+<h2 id="集群数据分片"><a href="#集群数据分片" class="headerlink" title="集群数据分片"></a>集群数据分片</h2><p>Redis Cluster是去中心化的，如下图所示，该集群由三个Redis节点组成，每个节点负责整个集群的一部分数据，每个节点负责的数据多少可能不一样，其中：</p>
+<ul>
+<li>节点A包含从0到5461的散列槽。</li>
+<li>节点B包含从5462到10922的散列槽。</li>
+<li>节点C包含从10923到16383的散列槽。</li>
+</ul>
+<p>这允许轻松添加和删除集群中的节点。例如，如果想添加一个新节点D，需要将一些哈希槽从节点A、B、C移动到D。同样，如果想从集群中删除节点A，只需移动节点A的哈希槽到B和C。当节点A为空时，完全可以从集群中删除它。</p>
+<p><img src="http://ww1.sinaimg.cn/large/006Vpl27gy1gacrqcxdh7j30ue0cmweg.jpg" alt="undefined"></p>
+<p>Redis Cluster将所有数据划分为16384个槽位（<a href="https://mp.weixin.qq.com/s/uwfGYUeR9-hcroaeQQqFPg" target="_blank" rel="noopener">为什么设计成16384个槽？</a>），每个节点负责其中一部分槽位。槽位的信息存储于每个节点中。当Redis Cluster的客户端来连接集群时，也会得到一份集群的槽位配置信息。这样当客户要查找某个<code>key</code>时，可以直接定位到目标节点。</p>
+<p>客户端为了可以直接定位某个具体的<code>key</code>所在的节点，需要缓存槽位相关信息，这样才可以准确快速地定位到相应的节点。同时因为可能会存在客户端与服务器存储槽位的信息不一致的情况，还需要纠正机制来实现槽位信息的效验调整。</p>
+<p>另外，Redis Cluster的每个节点会将集群的配置信息持久化到配置文件中，所以必须确保配置文件是可写的，而且尽量不要依靠人工修改配置文件。</p>
+<h2 id="槽定位算法"><a href="#槽定位算法" class="headerlink" title="槽定位算法"></a>槽定位算法</h2><p>Redis Cluster默认会对<code>key</code>值使用<code>crc16</code>算法进行<code>hash</code>，得到一个整数值，然后用这个整数值对16384进行取模来得到具体槽位。</p>
+<p>Redis Cluster还允许用户强制把某个<code>key</code>挂在特定槽位上。通过在<code>key</code>字符串里面嵌入<code>tag</code>标记，这就可以强制<code>key</code>所挂的槽位等于<code>tag</code>所在的槽位。例如，保证<code>this{foo}key</code>和<code>another{foo}key</code>位于相同的哈希槽中，可以使多个键在一个参数的命令中一起使用。</p>
+<p>下面是用C语言实现定位槽位样例代码。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">unsigned</span> <span class="keyword">int</span> <span class="title">HASH_SLOT</span><span class="params">(<span class="keyword">char</span> *key, <span class="keyword">int</span> keylen)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> s, e; <span class="comment">/* start-end indexes of &#123; and &#125; */</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Search the first occurrence of '&#123;'. */</span></span><br><span class="line">    <span class="keyword">for</span> (s = <span class="number">0</span>; s &lt; keylen; s++)</span><br><span class="line">        <span class="keyword">if</span> (key[s] == <span class="string">'&#123;'</span>) <span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* No '&#123;' ? Hash the whole key. This is the base case. */</span></span><br><span class="line">    <span class="keyword">if</span> (s == keylen) <span class="keyword">return</span> crc16(key,keylen) &amp; <span class="number">16383</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* '&#123;' found? Check if we have the corresponding '&#125;'. */</span></span><br><span class="line">    <span class="keyword">for</span> (e = s+<span class="number">1</span>; e &lt; keylen; e++)</span><br><span class="line">        <span class="keyword">if</span> (key[e] == <span class="string">'&#125;'</span>) <span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* No '&#125;' or nothing between &#123;&#125; ? Hash the whole key. */</span></span><br><span class="line">    <span class="keyword">if</span> (e == keylen || e == s+<span class="number">1</span>) <span class="keyword">return</span> crc16(key,keylen) &amp; <span class="number">16383</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* If we are here there is both a &#123; and a &#125; on its right. Hash</span></span><br><span class="line"><span class="comment">     * what is in the middle between &#123; and &#125;. */</span></span><br><span class="line">    <span class="keyword">return</span> crc16(key+s+<span class="number">1</span>,e-s<span class="number">-1</span>) &amp; <span class="number">16383</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="跳转"><a href="#跳转" class="headerlink" title="跳转"></a>跳转</h2><p>当客户端向一个错误的节点发出指令后，该节点会发现指令的<code>key</code>所在的槽位并不归自己管理，这时它会向客户端发送一个特殊的指令携带目标操作的节点地址，告诉客户端去连接这个节点以获取数据。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">GET x</span><br><span class="line">-MOVED 3999 127.0.0.1:6381</span><br></pre></td></tr></table></figure>
+
+<p><code>MOVED</code>指令的第一个参数是<strong>3999</strong>是<code>key</code>对用的槽位编号，后面是目标节点地址。<code>MOVED</code>指令前面有一个减号，表示该命令是一个错误消息。</p>
+<p>客户端在收到<code>MOVED</code>指令后，要立即纠正本地的槽位映射表。后续所有<code>key</code>将使用新的槽位映射表。</p>
+<h2 id="主从模型"><a href="#主从模型" class="headerlink" title="主从模型"></a>主从模型</h2><p>为了在主节点子集发生故障或无法与大多数节点通信时保持可用，Redis Cluster使用主从模型，其中每个散列槽从1（主节点本身）到N个副本（N-1个额外的从节点）。</p>
+<p>在具有节点A、B、C的示例集群中，如果节点B发生故障，则集群无法继续提供服务，因为我们不再能够在5501-11000范围内提供服务哈希位置的方法。</p>
+<p>然而，当创建集群时（或稍后），我们向每个主节点添加一个从节点，以便最终集群由作为主节点的A、B、C和作为从节点的A1、B1、C1组成。如果节点B出现故障，系统就能继续运行。</p>
+<p>节点B1复制节点B的数据，当节点B出现故障时，集群将节点B1升级为主节点，并将继续正常运行。但请注意，如果节点B和B1同时发生故障，Redis Cluster将无法继续运行。</p>
+<h2 id="集群一致性保证"><a href="#集群一致性保证" class="headerlink" title="集群一致性保证"></a>集群一致性保证</h2><p>Redis集群节点间使用异步冗余备份（asynchronous replication），所以在分区过程中总是存在一些时间段，在写时间段里容易丢失写入数据。但是一个连接到绝大部分主节点的客户端的时间段，与一个连接到极小部分主节点的客户端的时间段是相等不同的。Redis集群会努力尝试保存所有与大多数节点连接的客户端执行的写入操作，但以下两种情况除外：</p>
+<ol>
+<li>一个写入操作能到达一个主节点，但当主节点要回复客户端的时候，这个写入可能没有通过主从节点间的异步冗余备份传播到从节点那里。如果在某个写入操作没有到达从节点的时候主节点已经宕机了，那么该写入会永远地丢失掉，以防主节点长时间不可用而它的一个从节点已经被提升为主节点。</li>
+<li>另一个理论上可能会丢失写入操作的模式是：<ul>
+<li>因为分区是一个主节点不可达。</li>
+<li>故障转移（fail over）到主节点的一个从节点。（即从节点被提升为主节点）</li>
+<li>过一段时间后主节点再次变得不可达。</li>
+</ul>
+</li>
+</ol>
+<p>Redis Cluster无法保证<strong>强一致性</strong>。实际上，这意味着在某些条件下，Redis Cluster可能会丢失客户端写入的数据。</p>
+<p>Redis Cluster会努力尝试保存所有与大多数节点连接的客户端执行的写入操作，但以下两种情况除外：</p>
+<ol>
+<li><p>一个写入操作能到达一个主节点，但当主节点要回复客户端的时候，这个写入可能没有通过主从节点间的异步冗余备份传播到从节点那里。如果在某个写入操作没有到达从节点的时候主节点已经宕机了，那么该写入会永远地丢失掉，以防主节点长时间不可用从而它的一个从节点已经被提升为主节点。</p>
+<p>这与配置为每秒将数据刷新到磁盘的大多数数据库<strong>所发生的的情况非常相似</strong>，因此，由于过去使用不涉及分布式系统的传统数据库系统的经验，因此您已经能够推断这种情况。同样，可以通过再回复客户端之前强制数据刷新到磁盘上的方法来提高一致性，但这通常会导致性能过低。在Redis Cluster中，这相当于同步复制。</p>
+<p>基本上需要在性能和一致性之间进行权衡。</p>
+<p>Redis Cluster在绝对需要时支持同步写入，通过<code>WAIT</code>命令实现，这使得丢失写入的可能性大大降低，但请注意，即使使用同步复制，Redis Cluster也不会实现强一致性，在更复杂的情况下总是可以出现失败场景，无法接受写入的slave被选为master。</p>
+</li>
+<li><p>还有一种情况发生在网络分区中，其中客户端与少数实例（至少包括主节点）隔离。</p>
+<p>以6个节点为例，包括A、B、C、A1、B1、C1，3主3从。还有一个客户端，称之为Z1。在发生分区后，可能在分区的一侧有A、C、A1、B1、C1，在另一侧有B和Z1。Z1仍然可以写入B，它将接受其写入。如果分区在很短的时间内恢复，集群将继续正常运行。但是，如果分区持续足够多的时间是B1在分区的多数侧被提升为主节点，则Z1发送给B的写入将丢失。</p>
+<p>请注意，Z1将能够发送到B的写入量存在<strong>最大窗口：</strong>如果分区的多数方面已经有足够的时间将从节点选为主节点，则少数端的每个主节点都会停止接受写入。</p>
+<p>这段时间是Redis Cluster的一个非常重要的配置指令，称为<strong>节点超时（cluster-node-timeout）</strong>。节点超时后，主节点被视为不可用，可以由一个从节点替换。类似地，在节点超时已经过去而主节点无法感知大多数其他主节点之后，它进入错误状态并停止接受写入。</p>
+</li>
+</ol>
+<h2 id="可能下线（PFail）与确定下线（Fail）"><a href="#可能下线（PFail）与确定下线（Fail）" class="headerlink" title="可能下线（PFail）与确定下线（Fail）"></a>可能下线（PFail）与确定下线（Fail）</h2><p>因为Redis Cluster是去中心化的，一个节点认为某个节点失联了并不代表所有的节点都认为它失联了，所以集群还得经过一次协商的过程，只有当大多数节点都认定某个节点失联了，集群才认为该节点需要进行主从切换来容错。</p>
+<p>Redis集群节点采用<code>Gossip</code>协议来广播自己的状态以及改变对整个集群的认知。比如一个节点发现了某个节点失联了（PFail，即Possibly Fail），它会将这条信息向整个集群广播，其他节点就可以收到这点的失联信息。如果收到了某个节点失联的节点数量（PFail Count）已经达到了集群的大对数，就可以标记该失联节点为确定下线状态（Fail），然后向整个集群广播，强迫其他节点节点也接收该节点已经下线的事实，并立即对该失联节点进行主从切换。</p>
+<h2 id="集群配置参数"><a href="#集群配置参数" class="headerlink" title="集群配置参数"></a>集群配置参数</h2><p>我们即将创建一个示例集群部署。在此之前，先了解一下Redis Cluster在<code>redis.conf</code>文件中引入的配置参数。有些会很明显，有些会在你继续阅读时更清楚。</p>
+<ul>
+<li>*<em>cluster-enable&lt;yes/no&gt;: *</em>如果设置为<code>yes</code>，则在特定Redis实例中启动Redis集群支持。否则，实例像往常一样作为独立实例启动。</li>
+<li>*<em>cluster-config-file: *</em>请注意，尽管有此选项的名称，但这不是用户可编辑的配置文件，而是每次发生更改时Redis集群节点自动保存集群配置（基本上是状态）的文件，为了能够在启动时重新读取。该文件列出了集群中其他节点、状态、持久变量等内容。由于某些消息接收，通常会将此文件重写并书最新到磁盘山。</li>
+<li>*<em>cluster-node-time: *</em>表示某个节点持续<code>timeout</code>的时间失联时，才可以认定该节点出现故障，需要进行主从切换。如果没有这个选项，网络抖动会导致主从频繁切换（数据的重新复制）。</li>
+<li>*<em>cluster-slave-validity-factory: *</em>如果设置为零，则不管master和slave之间链路保持断开连接的时间长短，slave将始终尝试对master进行故障切换。如果该值为正，则计算<code>timeout</code>值乘以此选项提供的因子作为最大断开时间，如果节点是从节点，则如果主链接断开连接的时间超过指定的时间，则不会尝试启动故障转移。例如，如果节点超时设置为5秒，并且有效性因子设置为10，则从主节点断开直到超过50秒的时间内从节点将不会尝试故障转移。请注意，如果没有slave能够对其进行故障转移，则任何不同于零的值都可能导致Redis集群在master发生故障后不可用。在这种情况下，只有当原始主节点重新加入集群时，集群才会返回可用状态。</li>
+<li>*<em>cluster-require-full-converage&lt;yes/no&gt;: *</em>如果设置为<code>yes</code>，则默认情况下，如果有任何节点未覆盖某个百分比的<code>slots</code>数量，则集群将处于不可用状态（即一个主节点没有从节点，当它发生故障时，则集群将处于不可用状态）。如果该选项为<code>no</code>，可以允许部分节点发生故障时，其他节点还可以继续提供对外访问。</li>
+</ul>
+<h1 id="集群搭建"><a href="#集群搭建" class="headerlink" title="集群搭建"></a>集群搭建</h1><p>我这边的系统是mac，使用docker compose搭建的集群。</p>
+<blockquote>
+<p><a href="https://docs.docker-cn.com/compose/compose-file/#reference-and-guidelines" target="_blank" rel="noopener">Docker Compose</a> <em>是一个轻量级的容器编排工具，它使用</em> <code>yaml</code> <em>来编排容器，可以在 n 个容器中做通信。</em></p>
+</blockquote>
+<h2 id="docker-compose编写"><a href="#docker-compose编写" class="headerlink" title="docker compose编写"></a>docker compose编写</h2><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">version:</span> <span class="string">"3"</span></span><br><span class="line"><span class="attr">services:</span></span><br><span class="line">	<span class="comment"># 节点1</span></span><br><span class="line"><span class="attr">  redis-cluster-6380:</span></span><br><span class="line">  	<span class="comment"># 使用的镜像</span></span><br><span class="line"><span class="attr">    image:</span> <span class="attr">redis:latest</span></span><br><span class="line">    <span class="comment"># 容器的名称</span></span><br><span class="line"><span class="attr">    container_name:</span> <span class="string">redis-6380</span></span><br><span class="line"><span class="attr">    networks:</span></span><br><span class="line"><span class="attr">      cluster-net:</span></span><br><span class="line"><span class="attr">        ipv4_address:</span> <span class="number">172.16</span><span class="number">.238</span><span class="number">.10</span></span><br><span class="line">    <span class="comment"># 端口映射    </span></span><br><span class="line"><span class="attr">    ports:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">"6380:6380"</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">"16380:16380"</span></span><br><span class="line"><span class="attr">    volumes:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">./conf/redis-6380.conf:/usr/local/etc/redis/redis.conf</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">./log:/var/log/redis</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">./data:/data/redis</span></span><br><span class="line">    <span class="comment"># 启动redis的时候指定配置文件  </span></span><br><span class="line"><span class="attr">    command:</span> <span class="string">sh</span> <span class="bullet">-c</span> <span class="string">"redis-server /usr/local/etc/redis/redis.conf"</span></span><br><span class="line"><span class="attr">    environment:</span></span><br><span class="line">      <span class="comment"># 设置时区为上海，否则时间会有问题</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">TZ=Asia/Shanghai</span></span><br><span class="line"><span class="attr">  redis-cluster-6381:</span></span><br><span class="line"><span class="attr">    image:</span> <span class="attr">redis:latest</span></span><br><span class="line"><span class="attr">    container_name:</span> <span class="string">redis-6381</span></span><br><span class="line"><span class="attr">    networks:</span></span><br><span class="line"><span class="attr">      cluster-net:</span></span><br><span class="line"><span class="attr">        ipv4_address:</span> <span class="number">172.16</span><span class="number">.238</span><span class="number">.11</span></span><br><span class="line"><span class="attr">    ports:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">"6381:6381"</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">"16381:16381"</span></span><br><span class="line"><span class="attr">    volumes:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">./conf/redis-6381.conf:/usr/local/etc/redis/redis.conf</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">./log:/var/log/redis</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">./data:/data/redis</span></span><br><span class="line"><span class="attr">    command:</span> <span class="string">sh</span> <span class="bullet">-c</span> <span class="string">"redis-server /usr/local/etc/redis/redis.conf"</span></span><br><span class="line"><span class="attr">    environment:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">TZ=Asia/Shanghai</span></span><br><span class="line"><span class="attr">  redis-cluster-6382:</span></span><br><span class="line"><span class="attr">    image:</span> <span class="attr">redis:latest</span></span><br><span class="line"><span class="attr">    container_name:</span> <span class="string">redis-6382</span></span><br><span class="line"><span class="attr">    networks:</span></span><br><span class="line"><span class="attr">      cluster-net:</span></span><br><span class="line"><span class="attr">        ipv4_address:</span> <span class="number">172.16</span><span class="number">.238</span><span class="number">.12</span></span><br><span class="line"><span class="attr">    ports:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">"6382:6382"</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">"16382:16382"</span></span><br><span class="line"><span class="attr">    volumes:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">./conf/redis-6382.conf:/usr/local/etc/redis/redis.conf</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">./log:/var/log/redis</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">./data:/data/redis</span></span><br><span class="line"><span class="attr">    command:</span> <span class="string">sh</span> <span class="bullet">-c</span> <span class="string">"redis-server /usr/local/etc/redis/redis.conf"</span></span><br><span class="line"><span class="attr">    environment:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">TZ=Asia/Shanghai</span></span><br><span class="line"><span class="attr">  redis-cluster-6383:</span></span><br><span class="line"><span class="attr">    image:</span> <span class="attr">redis:latest</span></span><br><span class="line"><span class="attr">    container_name:</span> <span class="string">redis-6383</span></span><br><span class="line"><span class="attr">    networks:</span></span><br><span class="line"><span class="attr">      cluster-net:</span></span><br><span class="line"><span class="attr">        ipv4_address:</span> <span class="number">172.16</span><span class="number">.238</span><span class="number">.13</span></span><br><span class="line"><span class="attr">    ports:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">"6383:6383"</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">"16383:16383"</span></span><br><span class="line"><span class="attr">    volumes:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">./conf/redis-6383.conf:/usr/local/etc/redis/redis.conf</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">./log:/var/log/redis</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">./data:/data/redis</span></span><br><span class="line"><span class="attr">    command:</span> <span class="string">sh</span> <span class="bullet">-c</span> <span class="string">"redis-server /usr/local/etc/redis/redis.conf"</span></span><br><span class="line"><span class="attr">    environment:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">TZ=Asia/Shanghai</span></span><br><span class="line"><span class="attr">  redis-cluster-6384:</span></span><br><span class="line"><span class="attr">    image:</span> <span class="attr">redis:latest</span></span><br><span class="line"><span class="attr">    container_name:</span> <span class="string">redis-6384</span></span><br><span class="line"><span class="attr">    networks:</span></span><br><span class="line"><span class="attr">      cluster-net:</span></span><br><span class="line"><span class="attr">        ipv4_address:</span> <span class="number">172.16</span><span class="number">.238</span><span class="number">.14</span></span><br><span class="line"><span class="attr">    ports:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">"6384:6384"</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">"16384:16384"</span></span><br><span class="line"><span class="attr">    volumes:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">./conf/redis-6384.conf:/usr/local/etc/redis/redis.conf</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">./log:/var/log/redis</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">./data:/data/redis</span></span><br><span class="line"><span class="attr">    command:</span> <span class="string">sh</span> <span class="bullet">-c</span> <span class="string">"redis-server /usr/local/etc/redis/redis.conf"</span></span><br><span class="line"><span class="attr">    environment:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">TZ=Asia/Shanghai</span></span><br><span class="line"><span class="attr">  redis-cluster-6385:</span></span><br><span class="line"><span class="attr">    image:</span> <span class="attr">redis:latest</span></span><br><span class="line"><span class="attr">    container_name:</span> <span class="string">redis-6385</span></span><br><span class="line"><span class="attr">    networks:</span></span><br><span class="line"><span class="attr">      cluster-net:</span></span><br><span class="line"><span class="attr">        ipv4_address:</span> <span class="number">172.16</span><span class="number">.238</span><span class="number">.15</span></span><br><span class="line"><span class="attr">    ports:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">"6385:6385"</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">"16385:16385"</span></span><br><span class="line"><span class="attr">    volumes:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">./conf/redis-6385.conf:/usr/local/etc/redis/redis.conf</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">./log:/var/log/redis</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">./data:/data/redis</span></span><br><span class="line"><span class="attr">    command:</span> <span class="string">sh</span> <span class="bullet">-c</span> <span class="string">"redis-server /usr/local/etc/redis/redis.conf"</span></span><br><span class="line"><span class="attr">    environment:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">TZ=Asia/Shanghai</span></span><br><span class="line"><span class="attr">networks:</span></span><br><span class="line">  <span class="comment"># 创建集群网络，在容器之间通信</span></span><br><span class="line"><span class="attr">  cluster-net:</span></span><br><span class="line"><span class="attr">    ipam:</span></span><br><span class="line"><span class="attr">      config:</span></span><br><span class="line"><span class="attr">        - subnet:</span> <span class="number">172.16</span><span class="number">.238</span><span class="number">.0</span><span class="string">/24</span></span><br></pre></td></tr></table></figure>
+
+<p>Redis的集群需要容器的内部和外部通信，所以一般都设置容器的<code>network</code>为<code>host</code>模式，但是如果你使用的是<strong>mac docker</strong>则不支持<code>host</code>模式。</p>
+<p>如果你使用的是<strong>linux</strong>来部署Redis的集群，就不需要自定义<code>network</code>，可以直接设置<code>network=host</code>来完成容器的通信，上面<strong>docker-compose.yml</strong>的重点在于自己声明一个自定义的<code>network-cluster-net</code>来实现不同容器之间的通信。由于<strong>docker</strong>里面的<strong>ip</strong>是不固定的，我们没有办法获取<strong>docker</strong>容器里面的<strong>ip</strong>，所以在自定义<code>network</code>的时候，通过配置<code>subnet=172.16.238.0/24</code>将<code>cluster-net</code>的<strong>ip</strong>范围固定在<code>172.16.238.0/254</code>之间，然后在每一个Redis的节点中指定该节点的<strong>ip</strong>地址在我们配置的范围之内，就可以实现容器之间的相互通信。</p>
+<h2 id="Redis配置文件的编写"><a href="#Redis配置文件的编写" class="headerlink" title="Redis配置文件的编写"></a>Redis配置文件的编写</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span>################################# NETWORK #####################################</span><br><span class="line"></span><br><span class="line">bind 0.0.0.0</span><br><span class="line"></span><br><span class="line">port 6380</span><br><span class="line"></span><br><span class="line">tcp-backlog 511</span><br><span class="line"></span><br><span class="line">timeout 0</span><br><span class="line"></span><br><span class="line">tcp-keepalive 300</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span>################################ GENERAL #####################################</span><br><span class="line">supervised no</span><br><span class="line"></span><br><span class="line">pidfile /var/run/redis.pid</span><br><span class="line"></span><br><span class="line">loglevel notice</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 日志文件地址</span><br><span class="line">logfile /var/log/redis/redis-6380.log</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span>############################### SNAPSHOTTING  ################################</span><br><span class="line">save 900 1</span><br><span class="line">save 300 10</span><br><span class="line">save 60 10000</span><br><span class="line"></span><br><span class="line">stop-writes-on-bgsave-error yes</span><br><span class="line"></span><br><span class="line">rdbcompression yes</span><br><span class="line"></span><br><span class="line">rdbchecksum yes</span><br><span class="line"></span><br><span class="line">dbfilename dump-6380.rdb</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> rdb文件和aof文件存放地址</span><br><span class="line">dir /data/redis</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span>############################# MEMORY MANAGEMENT ################################</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 淘汰策略，删除设置了过期时间最不经常访问的key</span><br><span class="line">maxmemory-policy volatile-lru</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span>############################ LAZY FREEING ####################################</span><br><span class="line"></span><br><span class="line">lazyfree-lazy-eviction no</span><br><span class="line">lazyfree-lazy-expire no</span><br><span class="line">lazyfree-lazy-server-del no</span><br><span class="line">replica-lazy-flush no</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span>############################# APPEND ONLY MODE ###############################</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 开启aof持久化策略</span><br><span class="line">appendonly yes</span><br><span class="line"><span class="meta">#</span> aof文件名称</span><br><span class="line">appendfilename "appendonly-6380.aof"</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 每秒写入</span><br><span class="line">appendfsync everysec</span><br><span class="line"></span><br><span class="line">no-appendfsync-on-rewrite no</span><br><span class="line"></span><br><span class="line">auto-aof-rewrite-percentage 100</span><br><span class="line">auto-aof-rewrite-min-size 64mb</span><br><span class="line"></span><br><span class="line">aof-load-truncated yes</span><br><span class="line"></span><br><span class="line">aof-use-rdb-preamble yes</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span>############################### REDIS CLUSTER  ###############################</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 开启集群模式</span><br><span class="line">cluster-enabled yes</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 集群配置文件名称</span><br><span class="line">cluster-config-file nodes-6380.conf</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 节点失联超时时间</span><br><span class="line">cluster-node-timeout 5000</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span>######################### CLUSTER DOCKER/NAT support  ########################</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> docker虚拟网卡的ip，这里使用的桥接方式，直接设置宿主机ip</span><br><span class="line">cluster-announce-ip 192.168.1.107</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 节点映射端口</span><br><span class="line">cluster-announce-port 6380</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 总线映射端口,通常为节点映射端口前加1</span><br><span class="line">cluster-announce-bus-port 16380</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>配置文件就不做过多解释了，有兴趣的同学自行去官网查看。这份配置不建议放生成环境使用，我这边只是个人测试时使用。</p>
+</blockquote>
+<p>上面配置文件一共6份，修改一下端口号、日志文件名和持久化文件名即可。我这边是提前创建了存放日志和持久化数据文件的文件夹，如下图所示。</p>
+<p><img src="http://ww1.sinaimg.cn/large/006Vpl27gy1gachzcuv7cj30ks06qq3p.jpg" alt="5CAE9681-2C5B-438E-AA44-43990238A921.png"></p>
+<h2 id="集群启动"><a href="#集群启动" class="headerlink" title="集群启动"></a>集群启动</h2><p>进入到<strong>docker-compose.yml</strong>文件所在的目录，执行下面命令。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker-compose up -d</span><br></pre></td></tr></table></figure>
+
+<p>运行如下图所示。</p>
+<p><img src="http://ww1.sinaimg.cn/large/006Vpl27gy1gaci4czr7yj30q607imya.jpg" alt="CB14673C-008E-4042-9783-BAD95BAEC5B3.png"></p>
+<p>可以观察到容器在启动的时候加载的<code>network</code>是我们自定义的<code>network</code>。</p>
+<p>接下来，配置集群。执行以下命令，输入<code>yes</code>就可以配置成功Redis集群。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker exec -it redis-6380 redis-cli -p 6380 --cluster create 172.16.238.10:6380 172.16.238.11:6381 172.16.238.12:6382 172.16.238.13:6383 172.16.238.14:6384 172.16.238.15:6385 --cluster-replicas 1</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p> 选项<strong>–cluster replicas 1</strong> 表示我们希望为集群中的每个主节点创建一个从节点。</p>
+</blockquote>
+<p>配置成功如下图所示。</p>
+<p><img src="http://ww1.sinaimg.cn/large/006Vpl27gy1gacibkqon1j32fy1a87h2.jpg" alt="77B4BC9B-1259-4218-9774-ECE32AAA97D5.png"></p>
+<p>上图中打印信息主要是帮你分配了槽，给主节点挂上了从节点。</p>
+<p>最后打印的<strong>[OK] All 16384 slots covered</strong>，这表示集群中16384个槽都有至少一个主节点在处理，集群运作正常。</p>
+<p>我们可以使用以下命令，查看集群状态。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker exec -it redis-6380 redis-cli -p 6380 cluster info</span><br></pre></td></tr></table></figure>
+
+<p>如下图所示，表示集群正常运行中。</p>
+<p><img src="http://ww1.sinaimg.cn/large/006Vpl27gy1gacimzjleuj30yq0f040s.jpg" alt="C7352295-8DFD-4152-91C9-8A33B1F4A502.png"></p>
+<p>还可以用以下命令查看集群节点信息。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker exec -it redis-6380 redis-cli -p 6380 cluster nodes</span><br></pre></td></tr></table></figure>
+
+<p><img src="http://ww1.sinaimg.cn/large/006Vpl27gy1gaciq5811ij31ey09idjw.jpg" alt="E62E0D95-5C89-4F1F-A6A9-1485862A524A.png"></p>
+<h1 id="使用集群"><a href="#使用集群" class="headerlink" title="使用集群"></a>使用集群</h1><h2 id="手动触发故障转移"><a href="#手动触发故障转移" class="headerlink" title="手动触发故障转移"></a>手动触发故障转移</h2><p>我们使用以下代码在集群中插入数据并在运行过程中，使用<code>docker exec -it redis-6382 redis-cli -p 6382 debug segfault</code>停掉一个主节点，观察写入数据是否丢失以及从节点替换主节点需要多少时间。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Slf</span>4j</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ClusterTest</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test1</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> (JedisCluster cluster = RedisPool.getClusterConnection()) &#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">10000</span>; i++) &#123;</span><br><span class="line">                String key = <span class="string">"leusurexi-"</span> + i;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    cluster.set(key, UUID.randomUUID().toString());</span><br><span class="line">                &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                    <span class="comment">//e.printStackTrace();</span></span><br><span class="line">                    log.error(<span class="string">"&#123;&#125;写入失败"</span>, key);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><code>JedisCluster</code>对象的实例创建我就不贴代码了，大家自行Google。</p>
+</blockquote>
+<p><img src="http://ww1.sinaimg.cn/large/006Vpl27gy1gacp7rcwkij31ni01qdgl.jpg" alt="9205DD31-DB27-4C25-9907-1EC3E160C0FD.png"></p>
+<p><img src="http://ww1.sinaimg.cn/large/006Vpl27gy1gacp7ytlroj31my01mmxx.jpg" alt="4AABE25D-2C51-4CD9-90F8-38C3E5838B95.png"></p>
+<p>上面两张图是第一次写入失败和最后一次写入失败的日志，由此可以看出大概用了20秒的时间完成了主从节点的切换。由于我们的配置文件写的是15秒，接下来我们把配置文件中<code>cluster-node-timeout</code>改为5秒，再看下具体情况。</p>
+<p><img src="http://ww1.sinaimg.cn/large/006Vpl27gy1gacpdn4voej31ne01gt9i.jpg" alt="176B4C22-5DF0-412C-A551-CF01B2810B23.png"></p>
+<p><img src="http://ww1.sinaimg.cn/large/006Vpl27gy1gacpdtjul3j31n201eq3q.jpg" alt="4E425BC6-61EC-42AD-9AED-3C9BCF84FEC6.png"></p>
+<p>这次只用了8秒，说明配置还是起作用的。生成环境下，看具体情况配置此参数。</p>
+<p>然后我们再次用<code>docker exec -it redis-6380 redis-cli -p 6380 cluster nodes</code>命令查看集群节点信息。</p>
+<p>![image-20191228202521364](/Users/leisurexi/Library/Application Support/typora-user-images/image-20191228202521364.png)</p>
+<p>可以看到端口号6382的节点状态已经变成了<strong>fail</strong>，而6383节点变成了主节点。</p>
+<p>![image-20191228202839744](/Users/leisurexi/Library/Application Support/typora-user-images/image-20191228202839744.png)</p>
+<p>依次在三个主节点上执行<code>dbsize</code>命令，统计所有<code>key</code>的数量为<strong>9785</strong>，我们是循环了<strong>10000</strong>次。可以看出在主节点不可用，从节点切换为主节点的这段时间内的请求都会失败从而导致丢失数据。这种情况我们可以在<code>catch</code>代码块中加入待会再试之类的逻辑来处理。</p>
+<p>接下来我们重新启动6382节点。再查看集群节点信息。</p>
+<p>![image-20191228203623131](/Users/leisurexi/Library/Application Support/typora-user-images/image-20191228203623131.png)</p>
+<p>可以看到6382作为6383的从节点加入到了集群当中。</p>
+<h2 id="集群重新分片"><a href="#集群重新分片" class="headerlink" title="集群重新分片"></a>集群重新分片</h2><p>现在我们准备尝试集群重新分片。重新分片基本上意味着散列槽从一组节点移动到另一组节点。</p>
+<p>执行以下命令。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker exec -it redis-6380 redis-cli -p 6380 --cluster reshard 192.168.1.107:6380</span><br></pre></td></tr></table></figure>
+
+<p>然后会询问你槽的范围，如下所示。</p>
+<p><img src="http://ww1.sinaimg.cn/large/006Vpl27gy1gacqz30vx6j30ny0140st.jpg" alt="A2FB27CC-7C91-4426-B8D4-8DAD6491D197.png"></p>
+<p>我们可以尝试将1000个散列槽重新分配，直接输入1000然后下一步。</p>
+<p><img src="http://ww1.sinaimg.cn/large/006Vpl27gy1gacqzt5yinj30sk014q35.jpg" alt="124FF2B4-2B53-4512-B2FF-EB8375168300.png"></p>
+<p>接着让我们输入接收槽的节点ID，我们就输入6380节点的ID即可。</p>
+<p><img src="http://ww1.sinaimg.cn/large/006Vpl27gy1gacqu80mffj30t203owf2.jpg" alt="3388349A-BCC8-4B3D-8B88-AC6FD1D4BB68.png"></p>
+<p>现在需要制定从哪些节点来移动<code>key</code>到目标节点我输入的是<code>all</code>，这样就会从其他master上获取一些槽。</p>
+<p>然后会显示移动哪些槽的计划，这边直接输入<code>yes</code>即可，按照自动生成的计划执行。</p>
+<p><img src="http://ww1.sinaimg.cn/large/006Vpl27gy1gacr1276yvj30qc010q33.jpg" alt="D5D0CB37-96AB-4F26-8217-458530774B13.png"></p>
+<p>接下来可以看到每个<code>key</code>移动的信息，如下图所示。</p>
+<p><img src="http://ww1.sinaimg.cn/large/006Vpl27gy1gacr2zwc37j30rc0qsai3.jpg" alt="58999BE4-AFE6-40D0-B9A2-8BD8C3498F6A.png"></p>
+<p>最后对比移动槽前的和移动槽之后的集群节点信息。</p>
+<p><img src="http://ww1.sinaimg.cn/large/006Vpl27gy1gacr3vqj3rj31ew09i0wu.jpg" alt="5C8A3A50-5984-4F12-BAD0-B2A124FA4849.png"></p>
+<p><img src="http://ww1.sinaimg.cn/large/006Vpl27gy1gacraafltqj31f609m0wv.jpg" alt="627CF320-DDE1-4361-A6F3-6C6A65B63090.png"></p>
+<p>可以看到6380节点负责的槽位发生了变化，对比第一张图共计增加了<strong>1000</strong>个槽位，跟我们设置的一样。</p>
+<blockquote>
+<p>注意：重新分片后，槽位上的<code>key</code>也会顺带着移过去。</p>
+</blockquote>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><ul>
+<li>Redis Cluster不支持类似于<code>mget</code>这样一次获取多个<code>key</code>但是不是同一个<code>slot</code>的情况，在实际开发中，如果明确知道某类<code>key</code>会存在多键操作，可以在存储时通过上面提到的<code>tag</code>方式强制其位于同一个<code>slot</code>同一个节点。</li>
+<li>Redis Cluster通过分片存储、主从数据复制以及合理的故障转移策略，提供了更强的性能、更好的扩展性以及可用性，满足了CAP定理的AP两个特性。对于一致性，集群模式配合客户端策略可以说实现了“弱一致性”。</li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/redis/" rel="tag"><i class="fa fa-tag"></i> redis</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/category/2019/09/28/并发/线程池.html" rel="next" title="线程池">
+                <i class="fa fa-chevron-left"></i> 线程池
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="http://ww1.sinaimg.cn/large/0060rcQCly1g5ej8n7tqcj30hs0hs74i.jpg" alt="leisurexi">
+            
+              <p class="site-author-name" itemprop="name">leisurexi</p>
+              <p class="site-description motion-element" itemprop="description">此行一入深似海，从此红尘是路人。</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">11</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/leisurexi" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://www.jianshu.com/u/a5a58746a9b5" target="_blank" title="简书">
+                      
+                        <i class="fa fa-fw fa-heartbeat"></i>简书</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://www.zhihu.com/people/luo-wan-xi-73/activities" target="_blank" title="知乎">
+                      
+                        <i class="fa fa-fw fa-book"></i>知乎</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Redis-Cluster"><span class="nav-number">1.</span> <span class="nav-text">Redis Cluster</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#简介"><span class="nav-number">1.1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#集群数据分片"><span class="nav-number">1.2.</span> <span class="nav-text">集群数据分片</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#槽定位算法"><span class="nav-number">1.3.</span> <span class="nav-text">槽定位算法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#跳转"><span class="nav-number">1.4.</span> <span class="nav-text">跳转</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#主从模型"><span class="nav-number">1.5.</span> <span class="nav-text">主从模型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#集群一致性保证"><span class="nav-number">1.6.</span> <span class="nav-text">集群一致性保证</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#可能下线（PFail）与确定下线（Fail）"><span class="nav-number">1.7.</span> <span class="nav-text">可能下线（PFail）与确定下线（Fail）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#集群配置参数"><span class="nav-number">1.8.</span> <span class="nav-text">集群配置参数</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#集群搭建"><span class="nav-number">2.</span> <span class="nav-text">集群搭建</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#docker-compose编写"><span class="nav-number">2.1.</span> <span class="nav-text">docker compose编写</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis配置文件的编写"><span class="nav-number">2.2.</span> <span class="nav-text">Redis配置文件的编写</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#集群启动"><span class="nav-number">2.3.</span> <span class="nav-text">集群启动</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#使用集群"><span class="nav-number">3.</span> <span class="nav-text">使用集群</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#手动触发故障转移"><span class="nav-number">3.1.</span> <span class="nav-text">手动触发故障转移</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#集群重新分片"><span class="nav-number">3.2.</span> <span class="nav-text">集群重新分片</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">leisurexi</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+      <span class="post-meta-item-text">Site words total count&#58;</span>
+    
+    <span title="Site words total count">43.3k</span>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("1cLQ1u6xVEjYJeA0T9rVDOMo-gzGzoHsz", "tSLlfdpvBmydpW9VWBsf8Rwi");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/assets/koharu.model.json"},"display":{"position":"left","width":150,"height":300,"hOffset":75},"mobile":{"show":true},"react":{"opacity":0.7},"log":false});</script></body>
+</html>
