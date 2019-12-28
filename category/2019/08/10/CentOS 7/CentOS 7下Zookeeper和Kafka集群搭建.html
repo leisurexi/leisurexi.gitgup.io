@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="CentOS 7,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="本篇文章主要介绍在CentOS 7环境下搭建zk和kafka集群，先默认你已经安装好zookeeper和kafkaf；我的zookeeper版本是3.4.13，kafka版本是2.11-2.1.1。">
+<meta name="keywords" content="CentOS 7">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CentOS 7下Zookeeper和Kafka集群搭建">
+<meta property="og:url" content="https://github.com/leisurexi/category/2019/08/10/CentOS 7/CentOS 7下Zookeeper和Kafka集群搭建.html">
+<meta property="og:site_name" content="leisurexi&#39;s Blog">
+<meta property="og:description" content="本篇文章主要介绍在CentOS 7环境下搭建zk和kafka集群，先默认你已经安装好zookeeper和kafkaf；我的zookeeper版本是3.4.13，kafka版本是2.11-2.1.1。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://ww1.sinaimg.cn/large/006Vpl27ly1g81jwyel93j30ls03o758.jpg">
+<meta property="og:image" content="http://ww1.sinaimg.cn/large/006Vpl27ly1g81jyadj84j30ki03igmf.jpg">
+<meta property="og:image" content="http://ww1.sinaimg.cn/large/006Vpl27ly1g81kgo8yckj30kc03mdgi.jpg">
+<meta property="og:image" content="http://ww1.sinaimg.cn/large/006Vpl27ly1g81kg3971jj30jy03kq3m.jpg">
+<meta property="og:image" content="http://ww1.sinaimg.cn/large/006Vpl27ly1g81kh5pg9ij30ju03e0tj.jpg">
+<meta property="og:image" content="http://ww1.sinaimg.cn/large/006Vpl27ly1g81mg6xkhuj31ec04m0vh.jpg">
+<meta property="og:image" content="http://ww1.sinaimg.cn/large/006Vpl27ly1g81mnotrgfj31h2036757.jpg">
+<meta property="og:image" content="http://ww1.sinaimg.cn/large/006Vpl27ly1g81mp15px0j31i602smy2.jpg">
+<meta property="og:image" content="http://ww1.sinaimg.cn/large/006Vpl27ly1g81mph1zu4j31hw02i0tm.jpg">
+<meta property="og:updated_time" content="2019-10-20T11:36:16.783Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="CentOS 7下Zookeeper和Kafka集群搭建">
+<meta name="twitter:description" content="本篇文章主要介绍在CentOS 7环境下搭建zk和kafka集群，先默认你已经安装好zookeeper和kafkaf；我的zookeeper版本是3.4.13，kafka版本是2.11-2.1.1。">
+<meta name="twitter:image" content="http://ww1.sinaimg.cn/large/006Vpl27ly1g81jwyel93j30ls03o758.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://github.com/leisurexi/category/2019/08/10/CentOS 7/CentOS 7下Zookeeper和Kafka集群搭建.html">
+
+
+
+
+
+  <title>CentOS 7下Zookeeper和Kafka集群搭建 | leisurexi's Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">leisurexi's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">此行一入深似海，从此红尘是路人。</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://github.com/leisurexi/category/2019/08/10/CentOS 7/CentOS 7下Zookeeper和Kafka集群搭建.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="leisurexi">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="http://ww1.sinaimg.cn/large/0060rcQCly1g5ej8n7tqcj30hs0hs74i.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="leisurexi's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">CentOS 7下Zookeeper和Kafka集群搭建</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-08-10T10:35:00+08:00">
+                2019-08-10
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/CentOS-7/" itemprop="url" rel="index">
+                    <span itemprop="name">CentOS 7</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/category/2019/08/10/CentOS 7/CentOS 7下Zookeeper和Kafka集群搭建.html" class="leancloud_visitors" data-flag-title="CentOS 7下Zookeeper和Kafka集群搭建">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">热度&#58;</span>
+               
+                 <span class="leancloud-visitors-count">
+                  <span>℃</span>
+                 </span>
+             </span>
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  5.8k 字
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  21 分钟
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <hr>
+<p>本篇文章主要介绍在CentOS 7环境下搭建zk和kafka集群，先默认你已经安装好zookeeper和kafkaf；我的zookeeper版本是3.4.13，kafka版本是2.11-2.1.1。</p>
+<a id="more"></a>
+<h1 id="Zookeeper集群搭建"><a href="#Zookeeper集群搭建" class="headerlink" title="Zookeeper集群搭建"></a>Zookeeper集群搭建</h1><h2 id="zookeeper的安装与配置"><a href="#zookeeper的安装与配置" class="headerlink" title="zookeeper的安装与配置"></a>zookeeper的安装与配置</h2><ol>
+<li>从官网下载对应的安装包，安装包可以从官网获得，示例中使用的安装包是<code>zookeeper-3.4.13.tar.gz</code>，将其上传到<code>/opt</code>目录下，然后解压缩：</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tar -zxvf zookeeper-<span class="number">3.4</span>.13.tar.gz</span><br></pre></td></tr></table></figure>
+
+<p>​    修改文件夹名称：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mv zookeeper-<span class="number">3.4</span>.13 zookeeper</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>向<code>/etc/profile</code>配置文件中添加如下内容，并执行<code>source /etc/profile</code>命令使配置生效：</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">export ZOOKEEPER_HOME=/opt/zookeeper</span><br><span class="line">export PATH=$PATH:$ZOOKEEPER_HOME/bin</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>修改zookeeper配置文件。首先进入<code>$ZOOKEEPER_HOME/conf</code>目录，复制一份<code>zoo_sample.cfg</code>并将名称修改为<code>zoo.cfg</code>:</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cp zoo_sample.cfg zoo.cfg</span><br></pre></td></tr></table></figure>
+
+<p>然后修改<code>zoo.cfg</code>配置文件，内容参考如下:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"># zookeeper服务器心跳时间，单位为ms</span><br><span class="line">tickTime=<span class="number">2000</span></span><br><span class="line"># 投票选举新leader的初始化时间</span><br><span class="line">initLimit=<span class="number">10</span></span><br><span class="line"># leader与follower心跳检测最大容忍时间，响应超过 syncLimit * tickTime，leader认为follower死掉，从服务器列表删除follower</span><br><span class="line">syncLimit=<span class="number">5</span></span><br><span class="line"># 数据目录</span><br><span class="line">dataDir=/opt/zookeeper/data/</span><br><span class="line"># 日志目录</span><br><span class="line">dataLogDir=/opt/zookeeper/logs/</span><br><span class="line"># 对外服务的端口</span><br><span class="line">clientPort=<span class="number">2181</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>注意: 上面配置文件中的数据目录和日志目录需自行去创建对应的文件夹。</p>
+</blockquote>
+<ol start="4">
+<li><p>在上面配置文件中<code>dataDir</code>的目录下创建一个<code>myid</code>文件，并写入一个数值，比如0。<code>myid</code>文件里存放的是服务器的编号。</p>
+</li>
+<li><p>使用<code>zkServer.sh start</code>启动zookeeper服务，想起如下图:</p>
+<p><img src="http://ww1.sinaimg.cn/large/006Vpl27ly1g81jwyel93j30ls03o758.jpg" alt="B83229B9-889B-4A42-9EB9-19C3FCD8914C.png"></p>
+</li>
+<li><p>通过<code>zkServer.sh status</code>命令查看zookeeper服务状态，示例如下:</p>
+<p><img src="http://ww1.sinaimg.cn/large/006Vpl27ly1g81jyadj84j30ki03igmf.jpg" alt="16979E04-0881-4E22-942B-67341F47C660.png"></p>
+</li>
+</ol>
+<h2 id="zookeeper集群的配置"><a href="#zookeeper集群的配置" class="headerlink" title="zookeeper集群的配置"></a>zookeeper集群的配置</h2><p>上面是关于zookeeper单击模式的安装与配置，一般在生产环境中使用的都是集群模式，集群模式的配置也比较简单，相比单击模式而言只需要修改一些配置即可。下面以3台机器为例来配置一个zookeeper集群。首先在这3台机器的<code>/etc/hosts</code>文件中添加3台机器的IP地址与机器域名的映射，如下:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">192.168</span>.1.92 node1</span><br><span class="line"><span class="number">192.168</span>.1.93 node2</span><br><span class="line"><span class="number">192.168</span>.1.94 node3</span><br></pre></td></tr></table></figure>
+
+<p>然后在<code>zoo.cfg</code>的底部添加以下配置：</p>
+<blockquote>
+<p>注意: 这里server后的数字，与myid文件中的id是一致的。</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">server.1=<span class="number">192.168</span>.1.92:<span class="number">2888</span>:<span class="number">3888</span></span><br><span class="line">server.2=<span class="number">192.168</span>.1.93:<span class="number">2888</span>:<span class="number">3888</span></span><br><span class="line">server.3=<span class="number">192.168</span>.1.94:<span class="number">2888</span>:<span class="number">3888</span></span><br></pre></td></tr></table></figure>
+
+<p>然后在配置文件中<code>dataDir</code>的目录下新建myid文件，内容和代表本机器<code>server</code>后的数字一样。</p>
+<p>zookeeper启动会占用三个端口，分别的作用是:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">2181</span>：对cline端提供服务</span><br><span class="line"></span><br><span class="line"><span class="number">3888</span>：选举leader使用</span><br><span class="line"></span><br><span class="line"><span class="number">2888</span>：集群内机器通讯使用（Leader监听此端口）</span><br></pre></td></tr></table></figure>
+
+<p>然后分别启动三台机器上的zookeeper，启动后如下图所以有一个leader两个follower即代表成功：</p>
+<p><img src="http://ww1.sinaimg.cn/large/006Vpl27ly1g81kgo8yckj30kc03mdgi.jpg" alt="B9047C5A-A5FC-48BE-95A1-0ACBDE45922E.png"></p>
+<p><img src="http://ww1.sinaimg.cn/large/006Vpl27ly1g81kg3971jj30jy03kq3m.jpg" alt="4318B3C4-15C8-461D-99A8-15ADE0FB3A58.png"></p>
+<p><img src="http://ww1.sinaimg.cn/large/006Vpl27ly1g81kh5pg9ij30ju03e0tj.jpg" alt="DCC25FBC-EA20-4425-8C50-28E897113E79.png"></p>
+<p>为了便于讲解上面的配置，这里抽象出一个公式，即<code>server.A=B:C:D</code>。其中A是一个数字，代表服务器的编号，就是前面所说的<code>myid</code>文件里面的值。集群中每台服务器的编号都必须唯一，所以要保证每台服务器中的<code>myid</code>文件中的值不同。B代表服务器的IP地址。C表示服务器与集群中的leader服务器交换信息的端口。D表示选举时服务器相互通信的端口。</p>
+<h1 id="Kafka集群搭建"><a href="#Kafka集群搭建" class="headerlink" title="Kafka集群搭建"></a>Kafka集群搭建</h1><h2 id="Kafka的安装与配置"><a href="#Kafka的安装与配置" class="headerlink" title="Kafka的安装与配置"></a>Kafka的安装与配置</h2><ol>
+<li><p>跟前面的zookeeper一样去官网下载安装包，实例中使用的是<code>kafka_2.11-2.1.1.tar.gz</code> ，将其复制到<code>/opt</code>目录下解压缩，如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tar -zxvf kafka_2.11-<span class="number">2.1</span>.1.tar.gz</span><br></pre></td></tr></table></figure>
+
+<p>然后把文件夹改名：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mv kafka_2.11-<span class="number">2.1</span>.1 kafka</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>向<code>/etc/profile</code>配置文件中添加如下内容，并执行<code>source /etc/profile</code>命令使配置生效：</p>
+</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">export KAFKA_HOME=/opt/kafka</span><br><span class="line">export PATH=$PATH:$KAFKA_HOME/bin</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>修改broker的配置文件<code>$KAFKA_HOME/conf/server.properties</code>，如下：</li>
+</ol>
+<p>先修改<code>broker.id=0 (其他服务器1/2)</code>，然后修改<code>zookeeper.connect=192.168.1.92:2181,192.168.1.93:2181,192.168.1.94:2181</code>指向zk集群地址。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line">############################# Server Basics #############################</span><br><span class="line"># 每一个broker在集群中的唯一标示，要求是正数。在改变IP地址，不改变broker.id的话不会影响consumers</span><br><span class="line">broker.id=<span class="number">0</span></span><br><span class="line"></span><br><span class="line">############################# Socket Server Settings #############################</span><br><span class="line"># 提供给客户端响应的地址和端口</span><br><span class="line">listeners=PLAINTEXT:<span class="comment">//192.168.1.92:9092</span></span><br><span class="line"></span><br><span class="line"># broker 处理消息的最大线程数，一般情况下不需要去修改</span><br><span class="line">num.network.threads=<span class="number">3</span></span><br><span class="line"></span><br><span class="line"># broker处理磁盘IO的线程数 ，数值应该大于你的硬盘数</span><br><span class="line">num.io.threads=<span class="number">8</span></span><br><span class="line"></span><br><span class="line"># socket的发送缓冲区</span><br><span class="line">socket.send.buffer.bytes=<span class="number">102400</span></span><br><span class="line"></span><br><span class="line"># socket的接收缓冲区，socket的调优参数SO_SNDBUFF</span><br><span class="line">socket.receive.buffer.bytes=<span class="number">102400</span></span><br><span class="line">  </span><br><span class="line"># socket请求的最大数值，防止serverOOM，message.max.bytes必然要小于socket.request.max.bytes，会被topic创建时的指定参数覆盖</span><br><span class="line">socket.request.max.bytes=<span class="number">104857600</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">############################# Log Basics #############################</span><br><span class="line"># kafka数据的存放地址，多个地址的话用逗号分割/opt/kafka/logs，/opt/kafka/logs-2</span><br><span class="line">log.dirs=/opt/kafka/logs</span><br><span class="line"></span><br><span class="line"># 每个topic的分区个数，若是在topic创建时候没有指定的话会被topic创建时的指定参数覆盖</span><br><span class="line">num.partitions=<span class="number">1</span></span><br><span class="line"></span><br><span class="line"># 我们知道segment文件默认会被保留7天的时间，超时的话就会被清理，那么清理这件事情就需要有一些线程来做。这里就是用来设置恢复和清理data下数据的线程数量</span><br><span class="line">num.recovery.threads.per.data.dir=<span class="number">1</span></span><br><span class="line"></span><br><span class="line">############################# Internal Topic Settings  #############################</span><br><span class="line">offsets.topic.replication.factor=<span class="number">1</span></span><br><span class="line">transaction.state.log.replication.factor=<span class="number">1</span></span><br><span class="line">transaction.state.log.min.isr=<span class="number">1</span></span><br><span class="line"></span><br><span class="line">############################# Log Retention Policy #############################</span><br><span class="line"># segment文件保留的最长时间，默认保留7天（168小时），超时将被删除，也就是说7天之前的数据将被清理掉。</span><br><span class="line">log.retention.hours=<span class="number">168</span></span><br><span class="line"></span><br><span class="line"># 日志文件中每个segment的大小，默认为1G</span><br><span class="line">log.segment.bytes=<span class="number">1073741824</span></span><br><span class="line"></span><br><span class="line">#上面的参数设置了每一个segment文件的大小是1G，那么就需要有一个东西去定期检查segment文件有没有达到1G，多长时间去检查一次，就需要设置一个周期性检查文件大小的时间（单位是毫秒）。</span><br><span class="line">log.retention.check.interval.ms=<span class="number">300000</span></span><br><span class="line"></span><br><span class="line">############################# Zookeeper #############################</span><br><span class="line"># 消费者集群通过连接Zookeeper来找到broker。zookeeper连接服务器地址</span><br><span class="line">zookeeper.connect=<span class="number">192.168</span>.1.92:<span class="number">2181</span>,<span class="number">192.168</span>.1.93:<span class="number">2181</span>,<span class="number">192.168</span>.1.94:<span class="number">2181</span></span><br><span class="line"></span><br><span class="line"># Timeout in ms for connecting to zookeeper</span><br><span class="line">zookeeper.connection.timeout.ms=<span class="number">6000</span></span><br><span class="line"></span><br><span class="line">############################# Group Coordinator Settings #############################</span><br><span class="line">group.initial.rebalance.delay.ms=<span class="number">0</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="启动Kafka服务"><a href="#启动Kafka服务" class="headerlink" title="启动Kafka服务"></a>启动Kafka服务</h2><ol>
+<li>常规模式启动kafka：</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kafka-server-start.sh /opt/kafka/config/server.properties</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>进程守护模式启动kafka：</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kafka-server-start.sh -daemon /opt/kafka/config/server.properties</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>使用<code>jps -l</code>查看kafka进程是否启动：</li>
+</ol>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@node1 ~]# jps -l</span><br><span class="line"><span class="number">37296</span> org.apache.zookeeper.server.quorum.QuorumPeerMain</span><br><span class="line"><span class="number">76225</span> sun.tools.jps.Jps</span><br><span class="line">75125 kafka.Kafka #这个就是kafka服务端的进程</span><br></pre></td></tr></table></figure>
+
+<ol start="4">
+<li>停止命令：</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kafka-server-stop.sh</span><br></pre></td></tr></table></figure>
+
+<ol start="5">
+<li>启动成功后，连接zk查看节点<code>ids</code>信息：</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">zkCli.sh -server <span class="number">127.0</span>.0.1:<span class="number">2181</span>   连接zookeeper</span><br></pre></td></tr></table></figure>
+
+<ol start="6">
+<li>查看<code>ids</code>节点信息：</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ls /brokers/ids</span><br></pre></td></tr></table></figure>
+
+<p>如下所示代表成功</p>
+<blockquote>
+<p>我这边是启动三台kafka，如果你只启动一个那就只能看到一个。</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[zk: <span class="number">127.0</span>.0.1:<span class="number">2181</span>(CONNECTED) <span class="number">0</span>] ls /brokers/ids</span><br><span class="line">[<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>]</span><br></pre></td></tr></table></figure>
+
+<h2 id="生产与消费"><a href="#生产与消费" class="headerlink" title="生产与消费"></a>生产与消费</h2><p>生产者将消息发送至Kafka的主体中，或者更加确切地说应该是主题的分区中，而消费者也是通过订阅主题从而消费消息的。在显示生产与消费消息之前，需要创建一个主题作为消息的载体。</p>
+<p>Kafka提供了许多实用的脚本工具，存放在<code>$KAFKA_HOME</code>的bin目录下，其中与主题有关的就是<code>kafkatopics.sh</code>，下面我们用它演示创建一个分区数为4、副本因子为3的主题<code>topic-demo</code>，示例如下：</p>
+<blockquote>
+<p>注意：我此处的环境是zookeeper集群和kafka集群，分别为3个节点。</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kafka-topics.sh --create --zookeeper <span class="number">192.168</span>.1.92:<span class="number">2181</span>,<span class="number">192.168</span>.1.93:<span class="number">2181</span>,<span class="number">192.168</span>.1.94:<span class="number">2181</span> --replication-factor <span class="number">3</span> --partitions <span class="number">3</span> --topic topic-demo</span><br></pre></td></tr></table></figure>
+
+<p>其中<code>--create</code>是指创建主题的动作执行，<code>--zookeeper</code>指定了Kafka所连接的zookeeper服务地址，</p>
+<p><code>--replication-factor</code>指定了副本因子，<code>--partitions</code>指定了分区个数，<code>--topic</code>指定了所要创建主题的名称。</p>
+<p>可以通过下面指令查看所有主题：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kafka-topics.sh -list -zookeeper <span class="number">192.168</span>.1.92:<span class="number">2181</span>,<span class="number">192.168</span>.1.93:<span class="number">2181</span>,<span class="number">192.168</span>.1.94:<span class="number">2181</span></span><br></pre></td></tr></table></figure>
+
+<p>还可以通过<code>--describe</code>展示主题的更多具体信息，如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kafka-topics.sh --zookeeper <span class="number">192.168</span>.1.92:<span class="number">2181</span>,<span class="number">192.168</span>.1.93:<span class="number">2181</span>,<span class="number">192.168</span>.1.94:<span class="number">2181</span> --describe --topic topic-demo</span><br></pre></td></tr></table></figure>
+
+<p><img src="http://ww1.sinaimg.cn/large/006Vpl27ly1g81mg6xkhuj31ec04m0vh.jpg" alt="AA447FB2-DBA3-4133-9DDC-77DF8EA3564A.png"></p>
+<p>接下来我们再来检测一下Kafka集群是否可以正常地发送和消费信息。<code>$KAFKA_HOME/BIN</code>目录下还提供了两个脚本<code>kafka-console-producer.sh</code>和<code>kafka-console.consumer.sh</code>，通过控制台收发信息。首先我们在第二个和第三个节点上订阅主题<code>topic-demo</code>，如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kafka-console-consumer.sh --bootstrap-server <span class="number">192.168</span>.1.92:<span class="number">9092</span>,<span class="number">192.168</span>.1.93:<span class="number">9092</span>,<span class="number">192.168</span>.1.94:<span class="number">9092</span> --topic topic-demo</span><br></pre></td></tr></table></figure>
+
+<p>然后我们在第一个节点上开启生产者并发一条消息，如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kafka-console-producer.sh --broker-list <span class="number">192.168</span>.1.92:<span class="number">9092</span>,<span class="number">192.168</span>.1.93:<span class="number">9092</span>,<span class="number">192.168</span>.1.94:<span class="number">9092</span> --topic topic-demo</span><br></pre></td></tr></table></figure>
+
+<p><img src="http://ww1.sinaimg.cn/large/006Vpl27ly1g81mnotrgfj31h2036757.jpg" alt="33AE51B5-9887-4848-B223-64C35E6B624B.png"></p>
+<p>这时，我们看另外两个节点可以收到刚才节点1发送的消息，如下：</p>
+<p><img src="http://ww1.sinaimg.cn/large/006Vpl27ly1g81mp15px0j31i602smy2.jpg" alt="B8602A25-26AA-4BF5-8CA0-34C0B94FEF50.png"></p>
+<p><img src="http://ww1.sinaimg.cn/large/006Vpl27ly1g81mph1zu4j31hw02i0tm.jpg" alt="218D0F88-5FC3-4E58-BAD0-1C31A2C6AE6D.png"></p>
+<h2 id="Kafka生产者重要参数"><a href="#Kafka生产者重要参数" class="headerlink" title="Kafka生产者重要参数"></a>Kafka生产者重要参数</h2><ul>
+<li><p><strong>buffer.memory：</strong> <code>RecordAccumulator</code>（消息收集器）主要用来缓存消息以便<code>Sender</code>线程可以批量发送，进而减少网络传输的资源消耗以提升性能。<code>RecordAccumulator</code>缓存的大小可以通过该参数设置，默认33554432B，即32MB。如果生产者客户端要向很多分区发送消息，可以适当调大此参数以正价整体的吞吐量。</p>
+</li>
+<li><p><strong>max.block.ms：</strong> 如果生产者发送消息的速度超过发送到服务器的速度，则会导致生产者空间（即上述参数）不足，这个时候 <code>KafkaProducer</code> 的 <code>send()</code>方法要么被阻塞，要么抛出异常，取决于以下参数的配置，默认为60000，即60秒。</p>
+</li>
+<li><p><strong>batck.size：</strong>在Kafka生产者客户端中，通过<code>java.io.ByteBuffer</code>实现消息内存的创建和释放。不过频繁的创建和释放是比较耗费资源的，在<code>RecordAccumulator</code>内部还有一个<code>BufferPool</code>，它主要用来实现<code>ByteBuffer</code>的复用，以实现缓存的高效利用。不过<code>BufferPool</code>只针对特定的大小的<code>ByteBuffer</code>进行管理，而其他大小的<code>ByteBuffer</code>不会缓存进<code>BufferPool</code>中，默认为16384B，即16KB。可以适当调大以便多缓存一些消息。</p>
+</li>
+<li><p><strong>max.in.flight.requests.per.connection：</strong>请求在从<code>Sender</code>线程发往Kafka之前还会保存到<code>InFlightRequests</code>中，<code>InFlightRequests</code>保存对象的具体形式为<code>Map&lt;NodeId, Deque&lt;Request&gt;&gt;</code>，它的主要作用是缓存了已经发出去但还没有收到响应的请求（<code>NodeId</code>是一个<code>String</code>类型，表示节点的<code>id</code>编号）。与此同时，<code>InFlightRequests</code>还提供了许多管理类的方法，并且通过配置该参数还可以限制每个连接（也就是客户端与<code>Node</code>之间的连接）最多缓存的请求数。默认值为5，即每个连接最多只能缓存5个未响应的请求，超过该数值之后就不能再向这个连接发送更多的请求了，除非有缓存的请求收到了响应（Response）。</p>
+</li>
+<li><p><strong>acks：</strong>这个参数用来指定分区中必须要有多少个副本收到这条消息，之后生产者才会认为这条消息是成功写入的。<code>acks</code>是生产者客户端中一个非常重要的参数，它涉及消息的可靠性和吞吐量之间的权衡。<code>acks</code>参数有3中类型的值（都是字符串类型）。</p>
+<ul>
+<li><strong>acks = 1。</strong>默认值为1。生产者发送消息之后，只要分区的<code>leader</code>副本成功写入消息，那么它就会收到来自服务端的成功响应。如果消息无法写入<code>leader</code>副本，比如在<code>leader</code>副本崩溃、重新选举新的<code>leader</code>的过程中，那么生产者就会收到一个错误的响应，为了避免消息丢失，生产者可以选择重发消息。如果消息写入<code>leader</code>副本并成功响应给生产者，且在被其他<code>follower</code>副本拉去之前<code>leader</code>副本崩溃，那么此时消息还是会丢失，因为新选举的<code>leader</code>副本中并没有这条对应的消息。<code>acks</code>设置为1，是消息可靠性和吞吐量之间的折中方案。</li>
+<li><strong>acks = 0。</strong>生产者发送消息之后不需要等待任务服务端的响应。如果在消息从发送到写入Kafka的过程中出现某些异常，导致Kafka并没有收到这条消息，那么生产者也无从得知，消息也就丢失了。在其他配置环境相同的情况下，<code>acks</code>设置为0可以达到最大的吞吐量。</li>
+<li><strong>acks = -1 或 acks = all。</strong>生产者在消息发送之后，需要等待<code>ISR</code>中的所有副本都成功写入消息之后才能收到来自服务端的成功响应。在其他配置环境相同的情况下，<code>acks</code>设置为-1可以达到最强的可靠性。但这并不意味着消息就一定可靠，因为<code>ISR</code>中可能只有<code>leader</code>副本，这样就退化成了<code>acks = 1</code>的情况。要获得更高的消息可靠性需要配合<code>min.insync.replicas</code>等参数的联动。</li>
+</ul>
+</li>
+<li><p><strong>max.request.size：</strong>这个参数用来限制生产者客户端能发送的消息的最大值，默认为1048576B，即1MB。一般情况下，这个默认值就可以满足大多数应用场景了。</p>
+</li>
+<li><p><strong>retries 和 retry.backoff.ms：</strong><code>retries</code>参数用来配置生产者重试的次数，默认值为0，即在发生异常的时候不能进行任何的重试动作。消息在从生产者发出到成功写入服务器之前可能发生一些临时性的异常，比如网络抖动、<code>leader</code>副本的选举等，这种异常往往是可以自行恢复的，生产者可以通过配置<code>retries</code>大于0的值，以此通过内部重试来恢复而不是一味地将异常抛给生产者的应用程序。如果重试达到设定的次数，那么生产者就会放弃重试并返回异常。不过并不是所有的异常都是可以通过重试来解决的，比如消息太大，超过<code>max.request.size</code>参数配置的值时，这种方式就不可行了。重试还和另一个参数<code>retry.backoff.ms</code>有关，这个参数的默认值是100，它用来设定两次重试之间的时间间隔，避免无效的频繁重试。在配置<code>retries</code>和<code>retry.backoff.ms</code>之前，最好先估算一下可能的异常恢复时间，这样可以设定总的重试时间大于这个异常恢复时间，以此来避免生产者过早地放弃重试。</p>
+<blockquote>
+<p>Kafka可以保证同一个分区中的消息是有序的。如果生产者按照一定的顺序发送消息，那么这些消息也会顺序地写入分区，进而消费者也可以按照同样的顺序消费它们。对于某些应用来说，顺序性非常重要，比如<code>MySql</code>的<code>binlong</code>传输，如果出现错误就会造成非常重要的后果。如果将<code>acks</code>参数配置为非零值，并且<code>max.in.flight.requests.per.connection</code>参数配置为大于1的值，那么就会出现错序的现象：如果第一批次消息写入失败，而第二批次消息写入成功，那么生产者会重试发送第一批次的消息，此时如果第一批次的消息写入成功，那么这两个批次的消息就出现了错序。一般而言，在需要保证消息顺序的场合建议把参数<code>max.in.flight.requests.per.connection</code>配置为1，而不是把<code>acks</code>配置为0，不过这样也会影响整体的吞吐。</p>
+</blockquote>
+</li>
+<li><p><strong>compression.type：</strong>这个参数用来指定压缩方式，默认值为<code>none</code>，即默认情况下，消息不会被压缩。该参数还可以被配置为<code>gzip</code>、<code>snappy</code>和<code>lz4</code>。对消息进行压缩可以极大地减少网络传输量、降低网络I/O，从而提高整体的性能。消息压缩是一种使用时间换空间的优化方式，如果对时延有一定的要求，则不推荐对消息进行压缩。</p>
+</li>
+<li><p><strong>connections.max.idle.ms：</strong>这个参数用来指定在多久之后关闭闲置的连接，默认值时540000(ms)，即9分钟。</p>
+</li>
+<li><p><strong>linger.ms：</strong>这个参数用来指定生产者发送<code>ProducerBatch</code>之前等待更多消息（<code>ProducerRecoed</code>）加入<code>ProducerBatch</code>的时间，默认值为0。生产者客户端会在<code>ProducerBatch</code>被填满或等待时间超过<code>linger.ms</code>值时发送出去。增大这个参数的值会增加消息的延迟，但是同时能提升一定的吞吐量。这个<code>linger.ms</code>参数与TCP协议中的<code>Nagle</code>算法有异曲同工之妙。</p>
+</li>
+<li><p><strong>receive.buffer.bytes：</strong>这个参数用来设置<code>Socket</code>接收消息缓冲区（SO_RECBUF）的大小，默认值为32768(B)，即32KB。如果设置为-1，则使用操作系统的默认值。如果<code>Producer</code>与Kafka处于不同的机房，则可以适当调大这个参数值。</p>
+</li>
+<li><p><strong>send.buffer.bytes：</strong>这个参数用来设置<code>Socket</code>发送消息缓冲区（SO_SNDBUF）的大小，默认值为131072(B)，即128KB。与<code>receive.buffer.bytes</code>参数一样，设置为-1，则使用操作系统的默认值。</p>
+</li>
+<li><p><strong>request.timeout.ms：</strong>这个参数用来配置<code>Producer</code>等待请求响应的最长时间，默认值为30000(ms)。请求超时之后可以选择进行重试。注意这个参数需要比<code>broker</code>端参数<code>replica.lag.time.max.ms</code>的值要大，这样可以减少因客户端重试而引起的消息重复的概率。</p>
+</li>
+</ul>
+<h2 id="Kafka消费者重要参数"><a href="#Kafka消费者重要参数" class="headerlink" title="Kafka消费者重要参数"></a>Kafka消费者重要参数</h2><ul>
+<li><strong>fetch.min.bytes：</strong>该参数用来配置<code>Consumer</code>在一次拉取请求（调用<code>poll()</code>方法）中能从Kafka中拉取的最小的数据量，默认值为1(B)。kafka在收到<code>Consumer</code>的拉取请求时，如果返回给<code>Consumer</code>的数据量小于这个参数所配置的值，那么它就需要进行等待，直到数据量满足这个参数的配置大小。可以适当调大这个参数值以提高一定的吞吐量，不过也会造成额外的延迟（latency），对于延迟敏感的应用可能就不可取了。</li>
+<li><strong>fetch.max.bytes：</strong>该参数与<code>fetch.min.bytes</code>参数对于，它用来配置<code>Consumer</code>在一次拉取中从Kafka中拉取的最大数据量，默认值为52428800(B)，即50MB。如果这个参数设置的值比任何一条写入Kafka中的消息要小，那么会不会造成无法消费呢？很多资料对此参数的解读认为是无法消费的，比如一条消息的大小为10B，而这个参数是1(B)，既然此参数设定的值试一次拉取请求中所能拉取的最大数据量，那么显然<code>1B&lt;10B</code>，显然无法拉取。这个观点是错的，该参数设定的不是绝对的最大值，如果在第一个非空分区中拉取的第一条消息大于该值，那么该消息仍然可以返回，以确保消费者继续工作。也就是说，上面问题的答案是可以正常消费。与此相关的是，Kafka中所能接收的最大消息的大小通过服务端参数<code>message.max.bytes</code>来设置。</li>
+<li><strong>fetch.max.wait.ms：</strong>这个参数也和<code>fetch.min.bytes</code>参数有关，如果Kafka仅仅参考<code>fetch.min.bytes</code>参数的要求，那么有可能会一直阻塞等待而无法发送响应给<code>Consumer</code>，显然是不合理的。<code>fetch.max.wait.ms</code>参数用于指定Kafka的等待时间，默认值为500(ms)。如果Kafka中没有足够多的消息而满足不了<code>fetch.min.bytes</code>参数的要求，那么最终会等待500ms。这个蚕食的设定和<code>Consumer</code>与Kafka之间的延迟也有关系，如果业务应用对延迟敏感，那么可以适当调小这个参数。</li>
+<li><strong>max.partition.fetch.bytes：</strong>这个参数用来配置从每个分区里返回给<code>Consumer</code>的最大数据量，默认值为1048576(B)，即1MB。这个参数<code>fetch.max.bytes</code>参数相似，只不过前者用来限制一次拉取中每个分区的消息大小，而后者用来限制一次拉取中整体消息的大小。同样，如果这个参数设定的值比消息的大小要小，那么也不会造成无法消费，Kafka为了保持消费逻辑的正常运转不会对此做强硬的限制。</li>
+<li><strong>max.poll.records：</strong>这个参数用来配置<code>Consumer</code>在一次拉取中拉取的最大消息数，默认值为500条。如果消息的大小都比较小，则可以适当调大这个参数值来提升一定的消费速度。</li>
+<li><strong>connections.max.idle.ms：</strong>这个参数用来指定在多久之后关闭闲置的连接，默认值是540000(ms)，即9分钟。</li>
+<li><strong>exclude.internal.topics：</strong>Kafka中有两个内部主题：<code>_consumer_offsets</code>和<code>_transaction_state</code>。这个参数用来指定Kafka中的内部主题是否可以向消费者公开，默认值为<code>true</code>。如果设置为<code>true</code>，那么只能使用<code>subscribe(Collection)</code>的方式而不能使用<code>subscribe(Pattern)</code>的方式来订阅内部主题，设置为<code>false</code>则没有这个限制。</li>
+<li><strong>receive.buffer.bytes：</strong>这个参数用来设置<code>Socket</code>接收消息缓冲区（SO_RECBUF）的大小，默认值为32768(B)，即32KB。如果设置为-1，则使用操作系统的默认值。如果<code>Producer</code>与Kafka处于不同的机房，则可以适当调大这个参数值。</li>
+<li><strong>send.buffer.bytes：</strong>这个参数用来设置<code>Socket</code>发送消息缓冲区（SO_SNDBUF）的大小，默认值为131072(B)，即128KB。与<code>receive.buffer.bytes</code>参数一样，设置为-1，则使用操作系统的默认值。</li>
+<li><strong>request.timeout.ms：</strong>这个参数同来配置<code>Consumer</code>等待请求响应的最长时间，默认值为30000(ms)。</li>
+<li><strong>metadata.max.age.ms：</strong>这个参数用来配置元数据的过期时间，默认值为300000(ms)，即5分钟。如果元数据在此参数所限定的时间范围内没有进行更新，则会被强制更新，即使没有在任何分区变化或有新的<code>broker</code>加入。</li>
+<li><strong>reconnect.backoff.ms：</strong>这个参数用来配置尝试重新连接指定主机之前的等待时间（也被称为退避时间），避免频繁地连接主机，默认值为50(ms)。这种机制适用于消费之向<code>broker</code>发送的所有请求。</li>
+<li><strong>retry.backoff.ms：</strong>这个参数用来配置尝试重新发送失败的请求到指定的主题分区之前的等待（退避）时间，避免在某些故障情况下频繁地重复发送，默认值为100(ms)。</li>
+<li><strong>isolation.level：</strong>这个参数用来配置消费者的事务隔离级别。字符串类型，有效值为<code>read_uncommitted</code>和<code>read_committed</code>，表示消费者所消费到的位置，如果设置为<code>read_committed</code>，那么消费者就会忽略事务未提交的消息，即只能消费到<code>LSO(LastStableOffset)</code>的位置，默认情况下为<code>read_committed</code>，即可消费到<code>HW(Hight Watermark)</code>处的位置。</li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/CentOS-7/" rel="tag"><i class="fa fa-tag"></i> CentOS 7</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/category/2019/05/28/集合/LinkedList.html" rel="next" title="LinkedList">
+                <i class="fa fa-chevron-left"></i> LinkedList
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/category/2019/08/10/CentOS 7/CentOS 7 下RabbitMQ 3.7 安装与配置.html" rel="prev" title="CentOS 7下安装RabbitMQ 3.7">
+                CentOS 7下安装RabbitMQ 3.7 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="http://ww1.sinaimg.cn/large/0060rcQCly1g5ej8n7tqcj30hs0hs74i.jpg" alt="leisurexi">
+            
+              <p class="site-author-name" itemprop="name">leisurexi</p>
+              <p class="site-description motion-element" itemprop="description">此行一入深似海，从此红尘是路人。</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/leisurexi" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://www.jianshu.com/u/a5a58746a9b5" target="_blank" title="简书">
+                      
+                        <i class="fa fa-fw fa-heartbeat"></i>简书</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://www.zhihu.com/people/luo-wan-xi-73/activities" target="_blank" title="知乎">
+                      
+                        <i class="fa fa-fw fa-book"></i>知乎</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Zookeeper集群搭建"><span class="nav-number">1.</span> <span class="nav-text">Zookeeper集群搭建</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#zookeeper的安装与配置"><span class="nav-number">1.1.</span> <span class="nav-text">zookeeper的安装与配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#zookeeper集群的配置"><span class="nav-number">1.2.</span> <span class="nav-text">zookeeper集群的配置</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Kafka集群搭建"><span class="nav-number">2.</span> <span class="nav-text">Kafka集群搭建</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Kafka的安装与配置"><span class="nav-number">2.1.</span> <span class="nav-text">Kafka的安装与配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#启动Kafka服务"><span class="nav-number">2.2.</span> <span class="nav-text">启动Kafka服务</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#生产与消费"><span class="nav-number">2.3.</span> <span class="nav-text">生产与消费</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Kafka生产者重要参数"><span class="nav-number">2.4.</span> <span class="nav-text">Kafka生产者重要参数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Kafka消费者重要参数"><span class="nav-number">2.5.</span> <span class="nav-text">Kafka消费者重要参数</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">leisurexi</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+      <span class="post-meta-item-text">Site words total count&#58;</span>
+    
+    <span title="Site words total count">37.6k</span>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("1cLQ1u6xVEjYJeA0T9rVDOMo-gzGzoHsz", "tSLlfdpvBmydpW9VWBsf8Rwi");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/assets/koharu.model.json"},"display":{"position":"left","width":150,"height":300,"hOffset":75},"mobile":{"show":true},"react":{"opacity":0.7},"log":false});</script></body>
+</html>
