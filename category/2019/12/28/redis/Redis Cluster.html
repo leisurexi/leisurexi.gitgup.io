@@ -104,7 +104,7 @@
 <meta property="og:image" content="http://ww1.sinaimg.cn/large/006Vpl27gy1gacr2zwc37j30rc0qsai3.jpg">
 <meta property="og:image" content="http://ww1.sinaimg.cn/large/006Vpl27gy1gacr3vqj3rj31ew09i0wu.jpg">
 <meta property="og:image" content="http://ww1.sinaimg.cn/large/006Vpl27gy1gacraafltqj31f609m0wv.jpg">
-<meta property="og:updated_time" content="2019-12-28T13:58:38.892Z">
+<meta property="og:updated_time" content="2019-12-28T14:04:49.318Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Redis Cluster">
 <meta name="twitter:description" content="本篇文章主要介绍搭建Redis Cluster集群，并测试其故障转移，集群重新分片。">
@@ -556,6 +556,20 @@
 <li>Redis Cluster不支持类似于<code>mget</code>这样一次获取多个<code>key</code>但是不是同一个<code>slot</code>的情况，在实际开发中，如果明确知道某类<code>key</code>会存在多键操作，可以在存储时通过上面提到的<code>tag</code>方式强制其位于同一个<code>slot</code>同一个节点。</li>
 <li>Redis Cluster通过分片存储、主从数据复制以及合理的故障转移策略，提供了更强的性能、更好的扩展性以及可用性，满足了CAP定理的AP两个特性。对于一致性，集群模式配合客户端策略可以说实现了“弱一致性”。</li>
 </ul>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ul>
+<li><p><a href="http://www.redis.cn/topics/cluster-spec.html" target="_blank" rel="noopener">http://www.redis.cn/topics/cluster-spec.html</a></p>
+</li>
+<li><p><a href="https://github.com/MistRay/redis-docker-compose">https://github.com/MistRay/redis-docker-compose</a></p>
+</li>
+<li><p><a href="https://juejin.im/post/5d823a5ef265da03e168aec1#heading-18" target="_blank" rel="noopener">https://juejin.im/post/5d823a5ef265da03e168aec1#heading-18</a></p>
+</li>
+<li><p><a href="https://www.g5niusx.com/2019/04/redis-4.html" target="_blank" rel="noopener">https://www.g5niusx.com/2019/04/redis-4.html</a></p>
+</li>
+<li><p><a href="https://juejin.im/post/5d08faeff265da1bce3dd3b2#heading-10" target="_blank" rel="noopener">https://juejin.im/post/5d08faeff265da1bce3dd3b2#heading-10</a></p>
+</li>
+<li><p>《Redis 深度历险——钱文品》</p>
+</li>
+</ul>
 
       
     </div>
@@ -750,7 +764,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Redis-Cluster"><span class="nav-number">1.</span> <span class="nav-text">Redis Cluster</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#简介"><span class="nav-number">1.1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#集群数据分片"><span class="nav-number">1.2.</span> <span class="nav-text">集群数据分片</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#槽定位算法"><span class="nav-number">1.3.</span> <span class="nav-text">槽定位算法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#跳转"><span class="nav-number">1.4.</span> <span class="nav-text">跳转</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#主从模型"><span class="nav-number">1.5.</span> <span class="nav-text">主从模型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#集群一致性保证"><span class="nav-number">1.6.</span> <span class="nav-text">集群一致性保证</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#可能下线（PFail）与确定下线（Fail）"><span class="nav-number">1.7.</span> <span class="nav-text">可能下线（PFail）与确定下线（Fail）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#集群配置参数"><span class="nav-number">1.8.</span> <span class="nav-text">集群配置参数</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#集群搭建"><span class="nav-number">2.</span> <span class="nav-text">集群搭建</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#docker-compose编写"><span class="nav-number">2.1.</span> <span class="nav-text">docker compose编写</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis配置文件的编写"><span class="nav-number">2.2.</span> <span class="nav-text">Redis配置文件的编写</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#集群启动"><span class="nav-number">2.3.</span> <span class="nav-text">集群启动</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#使用集群"><span class="nav-number">3.</span> <span class="nav-text">使用集群</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#手动触发故障转移"><span class="nav-number">3.1.</span> <span class="nav-text">手动触发故障转移</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#集群重新分片"><span class="nav-number">3.2.</span> <span class="nav-text">集群重新分片</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Redis-Cluster"><span class="nav-number">1.</span> <span class="nav-text">Redis Cluster</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#简介"><span class="nav-number">1.1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#集群数据分片"><span class="nav-number">1.2.</span> <span class="nav-text">集群数据分片</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#槽定位算法"><span class="nav-number">1.3.</span> <span class="nav-text">槽定位算法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#跳转"><span class="nav-number">1.4.</span> <span class="nav-text">跳转</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#主从模型"><span class="nav-number">1.5.</span> <span class="nav-text">主从模型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#集群一致性保证"><span class="nav-number">1.6.</span> <span class="nav-text">集群一致性保证</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#可能下线（PFail）与确定下线（Fail）"><span class="nav-number">1.7.</span> <span class="nav-text">可能下线（PFail）与确定下线（Fail）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#集群配置参数"><span class="nav-number">1.8.</span> <span class="nav-text">集群配置参数</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#集群搭建"><span class="nav-number">2.</span> <span class="nav-text">集群搭建</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#docker-compose编写"><span class="nav-number">2.1.</span> <span class="nav-text">docker compose编写</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis配置文件的编写"><span class="nav-number">2.2.</span> <span class="nav-text">Redis配置文件的编写</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#集群启动"><span class="nav-number">2.3.</span> <span class="nav-text">集群启动</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#使用集群"><span class="nav-number">3.</span> <span class="nav-text">使用集群</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#手动触发故障转移"><span class="nav-number">3.1.</span> <span class="nav-text">手动触发故障转移</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#集群重新分片"><span class="nav-number">3.2.</span> <span class="nav-text">集群重新分片</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考"><span class="nav-number">5.</span> <span class="nav-text">参考</span></a></li></ol></div>
             
 
           </div>
