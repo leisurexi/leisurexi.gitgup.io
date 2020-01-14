@@ -95,9 +95,10 @@
 <meta property="og:image" content="http://ww1.sinaimg.cn/large/006Vpl27gy1gav9j8kbmwj32600ngqkg.jpg">
 <meta property="og:image" content="http://ww1.sinaimg.cn/large/006Vpl27gy1gava28lot8j30pq05ejsk.jpg">
 <meta property="og:image" content="http://ww1.sinaimg.cn/large/006Vpl27gy1gavb8kyim9j30pe0dcq6r.jpg">
+<meta property="og:image" content="http://ww1.sinaimg.cn/large/006Vpl27gy1gaweb6ksc1j31pi05gjsh.jpg">
 <meta property="og:image" content="http://ww1.sinaimg.cn/large/006Vpl27gy1gavbp6quu0j324y0c2qbz.jpg">
 <meta property="og:image" content="http://ww1.sinaimg.cn/large/006Vpl27gy1gavbq0yr1gj31p4058tai.jpg">
-<meta property="og:updated_time" content="2020-01-14T13:05:40.146Z">
+<meta property="og:updated_time" content="2020-01-14T13:09:20.061Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="RabbitMQ镜像集群模式">
 <meta name="twitter:description" content="本篇文章主要介绍搭建 RabbitMQ 镜像集群模式。">
@@ -523,7 +524,7 @@
 <p>然后关闭所有节点再重启，如下图所示。</p>
 <p><img src="http://ww1.sinaimg.cn/large/006Vpl27gy1gavb8kyim9j30pe0dcq6r.jpg" alt="359F358F-59B1-4B1F-8B37-20A1297432CF.png"></p>
 <p>确认后将三个节点打开并通过网页管理端的 <strong>Queue</strong> 页面查看：</p>
-<p>![image-20200113223754829](/Users/leisurexi/Library/Application Support/typora-user-images/image-20200113223754829.png)</p>
+<p><img src="http://ww1.sinaimg.cn/large/006Vpl27gy1gaweb6ksc1j31pi05gjsh.jpg" alt="image-20200113223754829.png"></p>
 <p><strong>Node</strong> 下有了一个红色的<code>+2</code>出现，它的意思是在集群中有两个节点（<code>rabbit@rmq-slave1</code>和<code>rabbit@rmq-slave2</code>）还没有实现镜像同步。因为之前有1000个消息它们两个节点不知道（因为是 <strong>RAM</strong> 节点，重启后就消失了）。</p>
 <p>此时我们启动消费者程序，因为消费者程序访问的是 <strong>HAProxy</strong> 代理，也就是间接的访问两个内存节点；发现也是可以正常访问的。</p>
 <p><img src="http://ww1.sinaimg.cn/large/006Vpl27gy1gavbp6quu0j324y0c2qbz.jpg" alt="D27061FB-7EB1-4DBC-8E00-6D5B2B2C16C7.png"></p>
