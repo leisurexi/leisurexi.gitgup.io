@@ -404,11 +404,14 @@ height:50vh;
         <p>本篇文章主要介绍 MySQL 中 <strong>EXPLAIN</strong> 命令的使用。</p>
 <a id="more"></a>
 
+
 <h1 id="EXPLAIN的作用"><a href="#EXPLAIN的作用" class="headerlink" title="EXPLAIN的作用"></a>EXPLAIN的作用</h1><p>在日常工作中，我们会有时会开慢查询去记录一些执行时间比较就的 SQL 语句，找出这些 SQL 语句并不意味着完事了，此时我们常常用到 <strong>EXPLAIN</strong> 这个命令开查看一下这些 SQL 语句的执行计划，查看该 SQL 语句有没有使用上索引，有没有做全表扫描，这都可以通过 <strong>EXPLAIN</strong> 命令来查看。所以我们深入了解 <strong>MySQL</strong> 的基于开销的优化器，还可以获得很多可能被优化器考虑到的访问策略的细节，以及当运行 SQL 语句时哪种策略预计会被优化器采用。</p>
 <h1 id="EXPLAIN各字段解释"><a href="#EXPLAIN各字段解释" class="headerlink" title="EXPLAIN各字段解释"></a>EXPLAIN各字段解释</h1><p>对于一个<strong>200万数据的表在 name 字段没建立索引的情况下执行</strong> <code>explain select name from user order by name desc</code> ，结果如下所示：</p>
 <p><img src="http://ww1.sinaimg.cn/large/006Vpl27gy1gaze0iccn5j30l402xwee.jpg" alt></p>
-<h3 id="1-id"><a href="#1-id" class="headerlink" title="1. id"></a>1. id</h3><p>执行编号，表示 <strong>select</strong> 所属的行。如果在语句中没子查询或关联查询，只有唯一的 <strong>select</strong> ，每行都将显示1。否则，内层的 <strong>select</strong> 语句一般会顺序编号，对应于其在原始语句中的位置。</p>
-<h3 id="2-select-type"><a href="#2-select-type" class="headerlink" title="2. select_type"></a>2. select_type</h3><p>表示查询的类型 。如果查询有任何复杂的子查询，则最外层标记为 <strong>PRIMARY (DERIVED、UNION、UNION RESULT)</strong> 。</p>
+<p><strong>1. id</strong></p>
+<p>执行编号，表示 <strong>select</strong> 所属的行。如果在语句中没子查询或关联查询，只有唯一的 <strong>select</strong> ，每行都将显示1。否则，内层的 <strong>select</strong> 语句一般会顺序编号，对应于其在原始语句中的位置。</p>
+<p><strong>2. select_type</strong> </p>
+<p>表示查询的类型 。如果查询有任何复杂的子查询，则最外层标记为 <strong>PRIMARY (DERIVED、UNION、UNION RESULT)</strong> 。</p>
 <ul>
 <li><p><strong>simple：</strong> 简单子查询，不包含子查询和 union。</p>
 </li>
@@ -427,7 +430,8 @@ height:50vh;
 <li><p><strong>dependent  subquery：</strong> 首先需要满足 subquery 的条件，及 subquery 中第二个以及后面的 select 语句，同时该语句依赖外部的查询。</p>
 </li>
 </ul>
-<h3 id="3-table"><a href="#3-table" class="headerlink" title="3. table"></a>3. table</h3><p>对应行正在访问哪一个表，表名或者别名。</p>
+<p><strong>3. table</strong></p>
+<p>对应行正在访问哪一个表，表名或者别名。</p>
 <ul>
 <li>关联优化器会为查询选择关联顺序，左侧深度优先。</li>
 <li>当 <strong>from</strong> 中有子查询的时候，表明是 <strong>derivedN</strong> 的形式，<strong>N</strong> 指向子查询，也就是 <strong>explain</strong> 结果中的下一列。</li>
@@ -436,7 +440,8 @@ height:50vh;
 <blockquote>
 <p>注意：MySQL 对待这些表和普通表一样，但是这些 “临时表” 是没有任何索引的。</p>
 </blockquote>
-<h3 id="4-type"><a href="#4-type" class="headerlink" title="4. type"></a>4. type</h3><p> 找到数据的方式，根据效率从高到低排序有如下几种：</p>
+<p><strong>4. type</strong></p>
+<p> 找到数据的方式，根据效率从高到低排序有如下几种：</p>
 <p><code>system &gt;  const &gt; eq_ref &gt; ref &gt; fulltext &gt; ref_or_null &gt; index_merge &gt; unique_subquery &gt; index_subquery &gt; range &gt; index &gt; ALL</code> ，一般来说，得保证查询至少达到 <strong>range</strong> 级别，最好能达到 <strong>ref</strong> ，否则这条语句是需要优化的。</p>
 <ul>
 <li><strong>ALL：</strong> 最坏的情况，全表扫描。</li>
@@ -449,13 +454,20 @@ height:50vh;
 <li><strong>system：</strong> 这是 const 连接类型的一种特例，表仅有一行满足条件。</li>
 <li><strong>Null：</strong> 意味说 MySQL 能在优化阶段分解查询语句，在执行阶段甚至用不到访问表或索引 (高效)。</li>
 </ul>
-<h3 id="5-possible-key"><a href="#5-possible-key" class="headerlink" title="5. possible_key"></a>5. possible_key</h3><p>显示查询可能使用了哪些索引，表示该索引可以进行高效地查找，但是列出来的索引对于后续优化过程可能是没有用的。</p>
-<h3 id="6-key"><a href="#6-key" class="headerlink" title="6. key"></a>6. key</h3><p>显示查询十几决定使用的键<strong>（索引）</strong> 。如果没有选择键，值是 <strong>Null</strong> 。要想前置 MySQL 使用或忽视 。</p>
-<h3 id="7-Possible-key"><a href="#7-Possible-key" class="headerlink" title="7. Possible_key"></a>7. Possible_key</h3><p>列中的索引，在查询中使用 <code>FORCE INDEX、USE INDEX 、IGNORE INDEX</code> 。</p>
-<h3 id="8-Key-len"><a href="#8-Key-len" class="headerlink" title="8. Key_len"></a>8. Key_len</h3><p>显示 MySQL 决定使用的键长度。如果键是 <strong>Null</strong> ，则长度为 <strong>Null</strong> 。使用的索引的长度，再不损失精确性的情况下，长度越短越好。</p>
-<h3 id="9-ref"><a href="#9-ref" class="headerlink" title="9. ref"></a>9. ref</h3><p> 显示使用哪个列或常数与 <strong>key</strong> 一起从表中选择行。</p>
-<h3 id="10-rows"><a href="#10-rows" class="headerlink" title="10. rows"></a>10. rows</h3><p>为了找到所需的行而需要读取的行数，估算值，不精确。通过把所有的 <strong>rows</strong> 列值相乘，可粗略估算整个查询会检查的行数。</p>
-<h3 id="11-Extra"><a href="#11-Extra" class="headerlink" title="11. Extra"></a>11. Extra</h3><p><strong>Extra</strong> 是 <strong>EXPLAIN</strong> 输出中另外一个很重要的列，该列显示 MySQL 在查询过程中的一些详细信息，MySQ L查询优化器执行查询的过程中对查询计划的重要补充信息。</p>
+<p><strong>5. possible_key</strong></p>
+<p>显示查询可能使用了哪些索引，表示该索引可以进行高效地查找，但是列出来的索引对于后续优化过程可能是没有用的。</p>
+<p><strong>6. key</strong></p>
+<p>显示查询十几决定使用的键<strong>（索引）</strong> 。如果没有选择键，值是 <strong>Null</strong> 。要想前置 MySQL 使用或忽视 。</p>
+<p><strong>7. Possible_key</strong></p>
+<p>列中的索引，在查询中使用 <code>FORCE INDEX、USE INDEX 、IGNORE INDEX</code> 。</p>
+<p><strong>8. Key_len</strong></p>
+<p>显示 MySQL 决定使用的键长度。如果键是 <strong>Null</strong> ，则长度为 <strong>Null</strong> 。使用的索引的长度，再不损失精确性的情况下，长度越短越好。</p>
+<p><strong>9. ref</strong></p>
+<p> 显示使用哪个列或常数与 <strong>key</strong> 一起从表中选择行。</p>
+<p><strong>10. rows</strong></p>
+<p>为了找到所需的行而需要读取的行数，估算值，不精确。通过把所有的 <strong>rows</strong> 列值相乘，可粗略估算整个查询会检查的行数。</p>
+<p><strong>11. Extra</strong></p>
+<p><strong>Extra</strong> 是 <strong>EXPLAIN</strong> 输出中另外一个很重要的列，该列显示 MySQL 在查询过程中的一些详细信息，MySQ L查询优化器执行查询的过程中对查询计划的重要补充信息。</p>
 <ul>
 <li><strong>Using filesort：</strong> 表示 MySQL 在对查询结果使用一个外部索引排序，而不是从表里按索引次序读到相关内容，可能在内存或者磁盘上进行排序。MySQL 中无法利用索引完成的排序操作称为 <strong>文件排序</strong> 。</li>
 <li><strong>Using temporary：</strong> 表示 MySQL 在对查询结果排序时使用临时表，常见于 <code>order by</code> 和 <code>group by</code> 。</li>
@@ -485,7 +497,7 @@ height:50vh;
             <p>原文作者：<a href="https://github.com/leisurexi">leisurexi</a>
             <p>原文链接：<a href="https://github.com/leisurexi/category/2020/01/18/MySQL/MySQL EXPLAIN详解.html">https://github.com/leisurexi/category/2020/01/18/MySQL/MySQL EXPLAIN详解.html</a>
             <p>发表日期：<a href="https://github.com/leisurexi/category/2020/01/18/MySQL/MySQL EXPLAIN详解.html">January 18th 2020, 5:09:00 pm</a>
-            <p>更新日期：<a href="https://github.com/leisurexi/category/2020/01/18/MySQL/MySQL EXPLAIN详解.html">January 18th 2020, 4:34:29 pm</a>
+            <p>更新日期：<a href="https://github.com/leisurexi/category/2020/01/18/MySQL/MySQL EXPLAIN详解.html">January 18th 2020, 9:52:08 pm</a>
             <p>版权声明：本文采用<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
         </div>
     
@@ -624,7 +636,7 @@ top:50vh;
         <div class="toc-catalog">
             <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
         </div>
-        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#EXPLAIN的作用"><span class="toc-number">1.</span> <span class="toc-text">EXPLAIN的作用</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#EXPLAIN各字段解释"><span class="toc-number">2.</span> <span class="toc-text">EXPLAIN各字段解释</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-id"><span class="toc-number">2.0.1.</span> <span class="toc-text">1. id</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-select-type"><span class="toc-number">2.0.2.</span> <span class="toc-text">2. select_type</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-table"><span class="toc-number">2.0.3.</span> <span class="toc-text">3. table</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-type"><span class="toc-number">2.0.4.</span> <span class="toc-text">4. type</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-possible-key"><span class="toc-number">2.0.5.</span> <span class="toc-text">5. possible_key</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-key"><span class="toc-number">2.0.6.</span> <span class="toc-text">6. key</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-Possible-key"><span class="toc-number">2.0.7.</span> <span class="toc-text">7. Possible_key</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#8-Key-len"><span class="toc-number">2.0.8.</span> <span class="toc-text">8. Key_len</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#9-ref"><span class="toc-number">2.0.9.</span> <span class="toc-text">9. ref</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#10-rows"><span class="toc-number">2.0.10.</span> <span class="toc-text">10. rows</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#11-Extra"><span class="toc-number">2.0.11.</span> <span class="toc-text">11. Extra</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#总结"><span class="toc-number">3.</span> <span class="toc-text">总结</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#参考"><span class="toc-number">4.</span> <span class="toc-text">参考</span></a></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#EXPLAIN的作用"><span class="toc-number">1.</span> <span class="toc-text">EXPLAIN的作用</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#EXPLAIN各字段解释"><span class="toc-number">2.</span> <span class="toc-text">EXPLAIN各字段解释</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#总结"><span class="toc-number">3.</span> <span class="toc-text">总结</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#参考"><span class="toc-number">4.</span> <span class="toc-text">参考</span></a></li></ol>
     </div>
     
     <div class="back-top iconfont-archer">&#xe639;</div>
