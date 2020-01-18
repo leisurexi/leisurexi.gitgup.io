@@ -88,7 +88,7 @@
 <meta property="og:description" content="本篇文章主要介绍 MySQL 中的事务，以及事务的实现原理。">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="http://ww1.sinaimg.cn/large/006Vpl27gy1gaxme0k7wjj30gs03haam.jpg">
-<meta property="og:updated_time" content="2020-01-18T06:54:35.005Z">
+<meta property="og:updated_time" content="2020-01-18T07:22:13.645Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="MySQL事务">
 <meta name="twitter:description" content="本篇文章主要介绍 MySQL 中的事务，以及事务的实现原理。">
@@ -351,7 +351,7 @@
                   <span class="post-meta-item-text">字数统计&#58;</span>
                 
                 <span title="字数统计">
-                  5.1k 字
+                  5.2k 字
                 </span>
               
 
@@ -647,7 +647,18 @@
 <li>在事务中可以通过定义 <code>SAVEPOINT</code> (例如：<code>mysql&gt; savepoint test;</code> 定义 <code>savepoint</code> ，名称为 <code>test</code> ) )，指定回滚事务的一个部分，但是不能指定提交事务的一个部分。对于复杂的应用，可以定义多个不同的 <code>SAVEPOINT</code> ，满足不同的条件时，回滚不同的 <code>SAVEPOINT</code> 。需要注意的是，如果定义了相同名字的 <code>SAVEPOINT</code> ，则后面定义的 <code>SAVEPOINT</code> 会覆盖之前的定义。对于不再需要使用的 <code>SAVEPOINT</code> ，可以通过 <code>RELEASE SAVEPOINT</code> 命令删除 <code>SAVEPOINT</code> ，删除后的 <code>SAVEPOINT</code> ，不能再执行 <code>ROLLBACL TO SAVEPOINT</code> 命令，否则会报异常。</li>
 </ul>
 <p><strong>自动提交（AUTOCOMMIT）:</strong></p>
-<p><strong>MySQL</strong> 默认采用的是自动提交模式，可以通过设置 <code>AUTOCOMMIT</code> 变量来启用或禁用自动提交模式。</p>
+<p><code>InnoDB</code> 默认采用事务 <strong>自动提交(AUTOCOMMIT)</strong> 机制。也就是说，如果不是显示开启一个事务，则每条 SQL 语句都 <strong>形成独立事务</strong> 。如果该语句执行后没有返回错误，<strong>MySQL</strong> 会自动执行 <code>COMMIT</code> 。但是如果该语句返回错误，则根据 <strong>错误情况</strong> 执行 <code>COMMIT</code>  或 <code>ROLLBACK</code> 。</p>
+<p>可以通过以下命令修改当前会话的提交模式。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 1或者ON表示启动，0或者OFF表示禁用</span></span><br><span class="line"><span class="keyword">SET</span> AUTOCOMMIT = <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>注意：</p>
+<ul>
+<li>关闭后，会话将始终开启一个事务。直到你显示提交或回滚该事务后，一个新事务又被开启。</li>
+<li>如果关闭了 <code>AUTOCOMMIT</code> 的会话没有显示提交事务，然后会话被关闭，<strong>MySQL</strong> 将回滚事务。</li>
+<li>有一些命令，在执行之后会强制执行 <code>COMMIT</code> 提交当前的活动事务。例如：<code>ALTER TABLE</code>、<code>LOCK TABLES</code>。</li>
+</ul>
+</blockquote>
 <p><strong>隐式锁定：</strong></p>
 <p><code>InnoDB</code> 在事务执行过程中，使用两阶段锁协议：</p>
 <ul>
@@ -656,7 +667,7 @@
 </ul>
 <p><strong>显示锁定：</strong></p>
 <p><code>InnoDB</code> 也支持通过特定的语句进行显示锁定（存储引擎层）：</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> ... <span class="keyword">lock</span> <span class="keyword">in</span> <span class="keyword">share</span> <span class="keyword">mode</span> //共享锁 </span><br><span class="line"><span class="keyword">select</span> ... <span class="keyword">for</span> <span class="keyword">update</span> //排他锁</span><br></pre></td></tr></table></figure>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">0select ... <span class="keyword">lock</span> <span class="keyword">in</span> <span class="keyword">share</span> <span class="keyword">mode</span> //共享锁 </span><br><span class="line"><span class="keyword">select</span> ... <span class="keyword">for</span> <span class="keyword">update</span> //排他锁</span><br></pre></td></tr></table></figure>
 
 <p><strong>MySQL Server</strong> 层的显示锁定：</p>
  <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">lock</span> <span class="keyword">table</span> 和 <span class="keyword">unlock</span> <span class="keyword">table</span></span><br></pre></td></tr></table></figure>
@@ -892,7 +903,7 @@
     
       <span class="post-meta-item-text">Site words total count&#58;</span>
     
-    <span title="Site words total count">51k</span>
+    <span title="Site words total count">51.2k</span>
   
 </div>
 
