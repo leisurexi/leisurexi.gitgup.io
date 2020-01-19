@@ -405,7 +405,7 @@ height:50vh;
 <a id="more"></a>
 
 
-<h1 id="EXPLAIN的作用"><a href="#EXPLAIN的作用" class="headerlink" title="EXPLAIN的作用"></a>EXPLAIN的作用</h1><p>在日常工作中，我们会有时会开慢查询去记录一些执行时间比较就的 SQL 语句，找出这些 SQL 语句并不意味着完事了，此时我们常常用到 <strong>EXPLAIN</strong> 这个命令开查看一下这些 SQL 语句的执行计划，查看该 SQL 语句有没有使用上索引，有没有做全表扫描，这都可以通过 <strong>EXPLAIN</strong> 命令来查看。所以我们深入了解 <strong>MySQL</strong> 的基于开销的优化器，还可以获得很多可能被优化器考虑到的访问策略的细节，以及当运行 SQL 语句时哪种策略预计会被优化器采用。</p>
+<h1 id="EXPLAIN的作用"><a href="#EXPLAIN的作用" class="headerlink" title="EXPLAIN的作用"></a>EXPLAIN的作用</h1><p>在日常工作中，我们会有时会开慢查询去记录一些执行时间比较就的 SQL 语句，找出这些 SQL 语句并不意味着完事了，此时我们常常用到 <strong>EXPLAIN</strong> 这个命令来查看一下这些 SQL 语句的执行计划，查看该 SQL 语句有没有使用上索引，有没有做全表扫描，这都可以通过 <strong>EXPLAIN</strong> 命令来查看。所以我们深入了解 <strong>MySQL</strong> 的基于开销的优化器，还可以获得很多可能被优化器考虑到的访问策略的细节，以及当运行 SQL 语句时哪种策略预计会被优化器采用。</p>
 <h1 id="EXPLAIN各字段解释"><a href="#EXPLAIN各字段解释" class="headerlink" title="EXPLAIN各字段解释"></a>EXPLAIN各字段解释</h1><p>对于一个<strong>200万数据的表在 name 字段没建立索引的情况下执行</strong> <code>explain select name from user order by name desc</code> ，结果如下所示：</p>
 <p><img src="http://ww1.sinaimg.cn/large/006Vpl27gy1gaze0iccn5j30l402xwee.jpg" alt></p>
 <p><strong>1. id</strong></p>
@@ -497,7 +497,7 @@ height:50vh;
             <p>原文作者：<a href="https://github.com/leisurexi">leisurexi</a>
             <p>原文链接：<a href="https://github.com/leisurexi/category/2020/01/18/MySQL/MySQL EXPLAIN详解.html">https://github.com/leisurexi/category/2020/01/18/MySQL/MySQL EXPLAIN详解.html</a>
             <p>发表日期：<a href="https://github.com/leisurexi/category/2020/01/18/MySQL/MySQL EXPLAIN详解.html">January 18th 2020, 5:09:00 pm</a>
-            <p>更新日期：<a href="https://github.com/leisurexi/category/2020/01/18/MySQL/MySQL EXPLAIN详解.html">January 18th 2020, 9:52:08 pm</a>
+            <p>更新日期：<a href="https://github.com/leisurexi/category/2020/01/18/MySQL/MySQL EXPLAIN详解.html">January 18th 2020, 10:52:41 pm</a>
             <p>版权声明：本文采用<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
         </div>
     
@@ -807,6 +807,8 @@ top:50vh;
     
     
     
+    
+    
     <div class="total-and-search">
         <div class="total-archive">
         Total : 14
@@ -889,12 +891,12 @@ top:50vh;
     
     
         <li class="archive-post-item">
-            <span class="archive-post-date">05/18</span><a class="archive-post-title" href= "/category/2019/05/18/集合/Collection.html" >Collection</a>
+            <span class="archive-post-date">05/18</span><a class="archive-post-title" href= "/category/2019/05/18/集合/ArrayList.html" >ArrayList</a>
         </li>
     
     
         <li class="archive-post-item">
-            <span class="archive-post-date">05/18</span><a class="archive-post-title" href= "/category/2019/05/18/集合/ArrayList.html" >ArrayList</a>
+            <span class="archive-post-date">05/18</span><a class="archive-post-title" href= "/category/2019/05/18/集合/Collection.html" >Collection</a>
         </li>
     
     
@@ -915,9 +917,9 @@ top:50vh;
     
         <span class="sidebar-tag-name" data-tags="RabbitMQ"><span class="iconfont-archer">&#xe606;</span>RabbitMQ</span>
     
-        <span class="sidebar-tag-name" data-tags="并发"><span class="iconfont-archer">&#xe606;</span>并发</span>
-    
         <span class="sidebar-tag-name" data-tags="集合"><span class="iconfont-archer">&#xe606;</span>集合</span>
+    
+        <span class="sidebar-tag-name" data-tags="并发"><span class="iconfont-archer">&#xe606;</span>并发</span>
     
         <span class="sidebar-tag-name" data-tags="Redis"><span class="iconfont-archer">&#xe606;</span>Redis</span>
     
@@ -962,9 +964,9 @@ jsonContent:
     
         <span class="sidebar-category-name" data-categories="RabbitMQ"><span class="iconfont-archer">&#xe60a;</span>RabbitMQ</span>
     
-        <span class="sidebar-category-name" data-categories="并发"><span class="iconfont-archer">&#xe60a;</span>并发</span>
-    
         <span class="sidebar-category-name" data-categories="集合"><span class="iconfont-archer">&#xe60a;</span>集合</span>
+    
+        <span class="sidebar-category-name" data-categories="并发"><span class="iconfont-archer">&#xe60a;</span>并发</span>
     
         <span class="sidebar-category-name" data-categories="Redis"><span class="iconfont-archer">&#xe60a;</span>Redis</span>
     
