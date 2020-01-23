@@ -272,7 +272,7 @@ height:50vh;
                 
                 
                     <div class="post-intro-read">
-                        <span>字数统计: <span class="post-count word-count">1.7k</span>阅读时长: <span class="post-count reading-time">5 min</span></span>
+                        <span>字数统计: <span class="post-count word-count">5.8k</span>阅读时长: <span class="post-count reading-time">21 min</span></span>
                     </div>
                 
                 <div class="post-intro-meta">
@@ -403,13 +403,46 @@ height:50vh;
     <article class="article-entry">
         <p>本篇文章主要介绍 MySQL 中的索引。</p>
 <a id="more"></a>
+
 <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>我们在平时工作中如果遇到查询慢的 SQL，第一反应是给对应的表建立索引。那么索引到底是什么呢？</p>
 <h1 id="MySQL索引原理"><a href="#MySQL索引原理" class="headerlink" title="MySQL索引原理"></a>MySQL索引原理</h1><h2 id="索引目的"><a href="#索引目的" class="headerlink" title="索引目的"></a>索引目的</h2><p><strong>索引</strong> 其实是一种数据结构，当表中的数据量越来越大时，索引对于性能的影响愈发重要。所以能够轻易将查询性能提升好几个数量级，总的来说就是可以明显提高查询效率。可以类比词典，如果要查 “mysql” 这个单词，我们肯定需要定位到 m 字母，然后从上往下找 y 字母，再找到剩下的 sql。如果没有索引，那么你可能就要把所有单词看一遍才能找到你想要的，如果我想找到 m 开头的单词呢？或者 ze 开头的单词呢？是不是觉得没有索引，这个事情根本无法完成？</p>
 <h2 id="索引原理"><a href="#索引原理" class="headerlink" title="索引原理"></a>索引原理</h2><p>除了词典，生活中随处可见索引的例子，如火车站的车次表、图书的目录等。它们的原理都是一样的，通过不断的缩小想要获得数据的范围来筛选出最终想要的结果，同时把随机的事件变成顺序的事件，也就是我们总是通过同一种查找方式来锁定数据。</p>
 <p>数据库也是一样，但显然要复杂许多，还有范围查询 <code>&gt;、&lt;、between、in</code>、迷糊查询 <code>like</code>、并集查询 <code>or</code>等等。数据库应该选择怎么样的方式来应对所有的问题呢？我们回想词典的例子，能不能把数据分成段，然后分段查询呢？最简单的如果1000条数据，1到100分成第一段，101到200分成第二段，201到300分第三段······这样查第250条数据，只要找到第三段就可以了，一下子取出 <strong>90%</strong> 的无效数据。但如果是1千万的记录呢，分成几段比较好？稍有算法基础的同学会想到搜索树，其平均复杂度是 <code>logn</code>，具有不错的查询性能。但这里我们忽略了一个关键的问题，复杂度模型是基于每次相同的操作成本来考虑的，数据库实现比较复杂，数据保存在磁盘上，而为了提高性能，每次又可以把部分数据读入内存来计算，因为我们知道访问磁盘的成本大概是访问内存的十万倍左右，所以简单的搜索树难以满足复杂的应用场景。</p>
-<h1 id="索引的数据结构"><a href="#索引的数据结构" class="headerlink" title="索引的数据结构"></a>索引的数据结构</h1><h2 id="存储结构上划分"><a href="#存储结构上划分" class="headerlink" title="存储结构上划分"></a>存储结构上划分</h2><h3 id="B-Tree索引"><a href="#B-Tree索引" class="headerlink" title="B+Tree索引"></a>B+Tree索引</h3><p><img src="http://ww1.sinaimg.cn/large/006Vpl27ly1gb284pgr6rj30hc08ct9c.jpg" alt="undefined"></p>
+<h1 id="索引"><a href="#索引" class="headerlink" title="索引"></a>索引</h1><h2 id="索引的数据结构"><a href="#索引的数据结构" class="headerlink" title="索引的数据结构"></a>索引的数据结构</h2><h3 id="二叉查找树"><a href="#二叉查找树" class="headerlink" title="二叉查找树"></a>二叉查找树</h3><p><img src="http://ww1.sinaimg.cn/large/006Vpl27gy1gb2svwqu0fj30g008oab8.jpg" alt="undefined"></p>
+<p>众所周知，二叉查找树是每个节点最多由两个子树的树结构，而其还有一个特点是，在任意一棵树种，<strong>根节点</strong> 的 <strong>左孩子</strong> 永远大于 <strong>小于</strong> 根节点，<strong>根节点</strong> 的 <strong>右孩子</strong> 永远 <strong>大于</strong> 根节点，用二叉查找树作为索引，确实可以提高效率，其可以使用二分查找将时间复杂度控制在 <code>O(logn)</code> ，但是二叉查找树有一个显而易见的 <strong>缺陷</strong> ，当某种 <strong>特殊情况</strong> (按照某个特定顺序插入树) 发生时，二叉查找树将变为上图右侧 (线形二叉树) 的抓概况。此时二叉查找树查找任意某个元素是，其查找顺序与逐行查找无异，查询时间复杂度有将回到 <code>O(n)</code> ，查询效率无法保持。</p>
+<h3 id="B-Tree"><a href="#B-Tree" class="headerlink" title="B-Tree"></a>B-Tree</h3><p><img src="http://ww1.sinaimg.cn/large/006Vpl27gy1gb2sz34mygj31ek0qwtsn.jpg" alt="undefined"></p>
+<p>B-Tree，平衡多路查找树，如果每个节点最多有 N 个孩子，那么这样的树就叫 N 阶 B-Tree，每个节点主要包含 <strong>关键字</strong> 和 <strong>指向孩子的指针</strong> ，最多能有几个孩子，取决与节点的容量和数据库的相关配置，通常情况下这个 N 是很大的。</p>
+<p>B-Tree 作为一种数据结构，有如下特征：</p>
+<ol>
+<li>根节点至少包含两个孩子。</li>
+<li>树中每个节点 <strong>至多</strong> 含有 N 个孩子 (N&gt;=2)。</li>
+<li>除根节点和叶子节点外，其它每个节点至少有 <code>ceil(N/2)</code> 个孩子。(<code>ceil</code> 表示取上限，例如1.2的上限是2，1.1的上限也是2，<strong>非四舍五入</strong>)</li>
+<li>所有叶子节点都位于同一层，即叶子节点的高度都是一样的。</li>
+<li>假设每个 <strong>非终端</strong> 节点包含 N 个关键字信息 (P0，P1 ······ Pn，K1 ······ Kn)，那么<ul>
+<li>ki (i = 1 ······ n) 为关键字，且关键字按升序排序 <code>K(i - 1) &lt; Ki</code> 。</li>
+<li>关键字的个数必须满足：<code>[ceil(m / 2) - 1] &lt;= n &lt;= m - 1</code> 。</li>
+<li>非叶子节点的指针：P[1]、P[2] ······ P[N]；其中 P[1] 指向关键字小于 K[1] 的子树，P[N] 指向关键字大于 <code>K[N - 1]</code> 的子树，其它 P[i] 指向关键字属于 <code>(K[i - 1], K[i])</code> 的子树。</li>
+</ul>
+</li>
+</ol>
+<p>遵守上述规则，其目的就是尽量是每个索引块都尽可能多的存储数据，尽可能减少查找次数以提升效率。</p>
+<p>假设我们要查询关键字为10的数据，则从根节点出发，<code>10 &lt; 17</code> ，于是通过 P1 进入其孩子节点，<code>10 &gt; 8</code> 且 <code>10 &lt; 12</code> ，于是通过 P2 进入其孩子节点，最后寻找到10。如果不使用索引，而使用逐行扫描的方式进行查找，则从0开始至少扫描10次才能查找到10号数据，有了索引之后可以看到，查找次数从10变为3，大大提高了查找效率。</p>
+<p>如果这里是 <strong>二叉查找树</strong> ，会出现极端情况，使得查找时间复杂度为 <code>O(n)</code> ，而如果是 <strong>B-Tree</strong> ，由于上述五个约束，可以让节点通过 <strong>合并、分裂、上移、下移登操作</strong>，使得树高度较二叉查找树较小，查找效率显然更高。</p>
+<h3 id="B-Tree-1"><a href="#B-Tree-1" class="headerlink" title="B+Tree"></a>B+Tree</h3><p><img src="http://ww1.sinaimg.cn/large/006Vpl27gy1gb2u0tpa8xj30my0c43zi.jpg" alt="undefined"></p>
+<p><strong>B+Tree</strong> 是 <strong>B-Tree</strong> 的一个变体，其定义基本与 <strong>B-Tree</strong> 相同，除了：</p>
+<ol>
+<li>非叶子节点的子树指针与关键字个数相同，其表明 <strong>B+Tree</strong> 能存储更多的关键字。</li>
+<li>非叶子节点的子树指针 P[i]，指向关键字值 <code>[K[i], K[i + 1]]</code>的子树。</li>
+<li>非叶子节点仅用来做索引，数据保存在叶子节点中。(<strong>B+树</strong> 的所有检索都是从根部开始，知道搜索到叶子节点结束)</li>
+<li>所有叶子节点均有一个链指针，指向下一个叶子节点。(方便直接在叶子节点直接做范围统计)</li>
+</ol>
+<p><strong>B+Tree</strong> 相较于 <strong>B-Tree</strong> 的优势：</p>
+<ol>
+<li><strong>B+Tree</strong> 的磁盘读写代价更低。</li>
+<li><strong>B+Tree</strong> 的查询效率更加稳定。</li>
+<li><strong>B+Tree</strong> 更有利于对数据库的扫描。</li>
+</ol>
 <p><strong>B+Tree</strong> 索引使用的是 <strong>B+树</strong> 数据结构，我们大多数情况使用的是 <code>InnoDB</code> 存储引擎，默认是 <strong>B+Tree</strong>。如上图，浅蓝色的块我们称之位一个磁盘块，可以看到每个磁盘块包含几个数据项 (深蓝色所示) 和指针 (黄色所示)，如磁盘1包含数据项17和35，包含指针P1、P2、P3，P1表示小于17的磁盘块，P2表示在17和35之间的磁盘块，P3表示大于35的磁盘块。真实的数据存在于叶子节点，即3、5、9、10、13、15 ······ 非叶子节点只储存不真实的数据和指针搜索方向的数据项，如17和35并不真实存在于数据表中。</p>
-<h4 id="B-数的查找过程"><a href="#B-数的查找过程" class="headerlink" title="B+数的查找过程"></a>B+数的查找过程</h4><p>如图所示，如果要查找数据项29，那么首先会把磁盘1由磁盘加载到内存，此时发生一次IO，在内存中用二分查找确定29在17和35之间，锁定磁盘块1的P2指针，内存时间因为非常短 (相比于磁盘的IO) 可以忽略不计，通过磁盘块1的P2指针指向的磁盘地址把磁盘块3由磁盘加载到内存，发生第二次IO，29在26和30之间，锁定磁盘块3的P2指针，通过指针加载磁盘块8到内存，发生第三次IO，同时内存中做二分查找找到29，结束查询，总计三次IO。真实的情况是，3层的 <strong>B+树</strong> 可以表示上百万的数据，如果上百万的数据查找只需要三次IO，性能将是巨大的提升，如果没有索引，每个数据项都要发生一次IO，那么总共需要百万次的IO，显然成本非常高。</p>
 <h3 id="Hash索引"><a href="#Hash索引" class="headerlink" title="Hash索引"></a>Hash索引</h3><p><strong>Hash索引</strong> 即哈希索引，哈希索引中储存的是 <strong>哈希值+数据行指针</strong>，索引大致结构如下图所示 (Slot 表示索引列根据 <code>hash</code> 函数计算出的值，Value 表示具体数据行的指针)：</p>
 <p><img src="http://ww1.sinaimg.cn/large/006Vpl27ly1gb28tgcdkcj30dw03tmx3.jpg" alt="undefined"></p>
 <h4 id="Hash索引的限制"><a href="#Hash索引的限制" class="headerlink" title="Hash索引的限制"></a>Hash索引的限制</h4><ul>
@@ -422,7 +455,111 @@ height:50vh;
 </ul>
 <p><code>InnoDB</code> 引擎有一个特殊的功能叫作 <strong>自适应哈希索引</strong> ，由 MySQL 自动管理，不需要人为干预。默认情况为开启，可以通过参数 <code>innodb_adaptove_hash_index</code> 来禁用此特性。</p>
 <p>当 <code>InnoDB</code> 注意到某些索引值被使用得非常频繁时，它会在内存中基于缓冲池的 <strong>B+Tree</strong> 索引上再创建一个哈希索引，这样 <strong>B+Tree</strong> 索引也具有哈希索引的一些优点，比如快速的哈希查找。但是只能用于等值比较，例如 <code>=、&lt;=&gt;、IN</code> ，无法用于排序。</p>
-<p><code>InnoDB</code> 官方文档显示，启用自适应哈希索引后，读和写性能可以提高2倍，对于辅助索引的连接操作，性能可以提高5倍。</p>
+<p><code>InnoDB</code> 官方文档显示，启用自适应哈希索引后，读和写性能可以提高 <strong>2倍</strong> ，对于辅助索引的连接操作，性能可以提高 <strong>5倍</strong> 。</p>
+<h3 id="全文-Full-text-索引"><a href="#全文-Full-text-索引" class="headerlink" title="全文 (Full-text) 索引"></a>全文 (Full-text) 索引</h3><p>我们平时在模糊查询时用的比较多的是 <code>like + %</code> ，但这种方式值适合用于在文本比较少的情况下，对于大量的文本数据检索性能是很低的。<strong>全文索引</strong> 在大量的数据面前，能比 <code>like + %</code> 快 <strong>N</strong> 倍，速度不是一个数量级的，但是 <strong>全文索引</strong> 可能存在精度问题。</p>
+<h4 id="版本支持"><a href="#版本支持" class="headerlink" title="版本支持"></a>版本支持</h4><ul>
+<li>MySQL 5.6 以前的版本，只有 <code>MyISAM</code> 存储引擎支持全文索引。</li>
+<li>MySQL 5.6 及以后的版本，<code>MyISAM</code> 和 <code>InnoDB</code> 存储引擎均支持全文索引。</li>
+<li>只有字段的数据类型为 <code>CHAR</code> 、<code>VARCHAR</code>、<code>TEXT</code> 才可以建全文索引。</li>
+<li>MySQL 的全文索引最开始仅支持英语，因为英语的词与词之间有空格，使用空格作为分词符时跟方便的。亚洲文字，比如汉语、日语、韩语等是没有空格的，这就造成了一定的限制。不过 MySQL 5.7.6 开始，引入了一个 <code>ngram</code> 全文分析器来解决这个问题，并且对 <code>MyISAM</code> 和 <code>InnoDB</code> 引擎都有效。</li>
+</ul>
+<h4 id="使用全文索引"><a href="#使用全文索引" class="headerlink" title="使用全文索引"></a>使用全文索引</h4><p>和常用的模糊匹配使用 <code>like + %</code> 不同，<strong>全文索引</strong> 有自己的语法格式，使用 <code>match</code> 和 <code>against</code> 关键字，如下：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span> <span class="keyword">test</span> <span class="keyword">where</span> <span class="keyword">match</span>(<span class="keyword">content</span>, tag) against(<span class="string">'xx'</span>)</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>注意：<strong>match</strong> 函数中指定的列必须和 <strong>全文索引</strong> 中指定的列完全相同，否则就会报错，无法使用全文索引，这是因为全文索引不会记录关键字来自哪一列。如果想要对某一列使用全文索引，请单独为该列创建全文索引。</p>
+</blockquote>
+<p>关于 <strong>全文索引</strong> 更详细的内容，可以查看 <a href="https://zhuanlan.zhihu.com/p/35675553" target="_blank" rel="noopener">MySQL之全文索引</a> 。</p>
+<h2 id="聚集索引、覆盖索引"><a href="#聚集索引、覆盖索引" class="headerlink" title="聚集索引、覆盖索引"></a>聚集索引、覆盖索引</h2><h4 id="聚集索引和非聚集索引"><a href="#聚集索引和非聚集索引" class="headerlink" title="聚集索引和非聚集索引"></a>聚集索引和非聚集索引</h4><p><strong>聚集索引</strong> 文件中的每个搜索码都对应一个索引值，<strong>非聚集索引</strong> 文件只为索引码的某些值建立索引项。</p>
+<p><strong>聚集索引</strong> 将数据存储与索引放到了一块，找到索引也就找到了数据，<strong>非聚集索引</strong> 将数据和索引分来存储，索引结构的叶子节点指向数据的对应行。</p>
+<p><code>MyISAM</code> 不论是 <strong>主键索引、唯一键索引、还是普通索引</strong> ，都采用的是 <strong>非聚集索引</strong> ，而 <code>InnoDB</code> 必须有且仅有一个 <strong>聚集索引</strong> 。</p>
+<p><code>InnoDB</code> 聚集索引规则：</p>
+<ol>
+<li>若一个主键被定义，该主键则作为 <strong>聚集索引</strong> 。</li>
+<li>若没有主键被定义，该表的第一个 <strong>唯一非空索引</strong> 则作为 <strong>聚集索引</strong> 。</li>
+<li>若不满足以上条件，<code>InnoDB</code> 内部会生成一个隐藏主键 <strong>(聚集索引)</strong> 。</li>
+<li>非主键索引存储相关键位和其对应的主键值，包含两次查找。</li>
+</ol>
+<blockquote>
+<p>注：<strong>InnoDB</strong>  如果查询条件为 <strong>主键索引</strong> ，则只需查询一次，但是 <strong>辅助索引</strong> 需要查询两次，先通过 <strong>辅助索引</strong> 查询到 <strong>主键索引</strong>， 再查询到数据。</p>
+</blockquote>
+<p><img src="http://ww1.sinaimg.cn/large/006Vpl27gy1gb2v0my8kyj318z0lygy9.jpg" alt="undefined"></p>
+<p>从上图中可以看到，如果一个索引时 <strong>聚集索引</strong> ， 则其叶子节点上存放的是数据本身，而如果一个索引是 <strong>非聚集索引</strong> ，叶子节点存放的仅是地址，指向将要查询的数据。</p>
+<h4 id="覆盖索引"><a href="#覆盖索引" class="headerlink" title="覆盖索引"></a>覆盖索引</h4><p>一般情况下，<strong>聚集索引</strong> 是比 <strong>非聚集索引</strong> 的查询速度要快，因为 <strong>聚集索引</strong> 的叶子节点直接就是我们要查询的整行数据了，而 <strong>非聚集索引</strong> 的叶子节点是 <strong>主键</strong> 的值，查到主键的值后，还需要通过主键 <strong>回表</strong> 再进行一次查询。但是有一种情况 可以通过 <strong>覆盖索引</strong> 也可以让 <strong>非聚集索引</strong> 只查询一次不需要 <strong>回表查询</strong> 。</p>
+<p><strong>覆盖索引</strong> 指一个查询语句的执行只用从索引中就能够取得，不必从数据表中读取。当一条查询语句符合 <strong>覆盖索引</strong> 条件时，MySQL 只需要通过索引就可以返回查询所需要的数据，这样避免了查到索引后再 <strong>回表</strong> 的操作，减少 I/O 提高效率。如，表 <code>convering_index_sample</code> 中有一个普通索引 <code>inx_key1_key2(key1, key2)</code> 。当我们通过 SQL 语句：<code>select key2 from convering_index_sample where key1 = &#39;keytest&#39;</code> 的时候，就可以通过 <strong>覆盖索引</strong> 查询，无需 <strong>回表</strong> 。</p>
+<h4 id="为什么-InnoDB-只有一个聚集索引，而不将所有索引都使用聚集索引？"><a href="#为什么-InnoDB-只有一个聚集索引，而不将所有索引都使用聚集索引？" class="headerlink" title="为什么 InnoDB 只有一个聚集索引，而不将所有索引都使用聚集索引？"></a>为什么 InnoDB 只有一个聚集索引，而不将所有索引都使用聚集索引？</h4><p>因为 <strong>聚集索引</strong> 是将索引和数据都存放在叶子节点中，如果所有的索引都用 <strong>聚集索引</strong> ，则每一个索引都将保存一份数据，会造成数据的冗余，在数据量很大的情况下，这种数据冗余是很消耗资源的。</p>
+<h2 id="索引类型"><a href="#索引类型" class="headerlink" title="索引类型"></a>索引类型</h2><h3 id="普通索引"><a href="#普通索引" class="headerlink" title="普通索引"></a>普通索引</h3><p>这是最基本的索引，它没有任何限制。普通索引 (由关键字 <strong>KEY</strong> 或 <strong>INDEX</strong> 定义的索引) 的唯一任务是加快对数据的访问速度。因此，应该只为那些最经常出现在查询条件 <code>where column = ······</code> 或排序条件 <code>order by column</code> 中的数据列创建索引。</p>
+<h3 id="唯一索引"><a href="#唯一索引" class="headerlink" title="唯一索引"></a>唯一索引</h3><p>它与前面的 <strong>普通索引</strong> 类似，不同的就是：<strong>普通索引</strong> 允许被索引的数据列包含重复的值。而唯一索引列的值必须是唯一的，但允许有空值。如果是 <strong>联合索引</strong> ，则列值得组合必须是唯一的。</p>
+<h3 id="主键索引"><a href="#主键索引" class="headerlink" title="主键索引"></a>主键索引</h3><p>它是一种特殊的 <strong>唯一索引</strong> ，不允许有空值。一个表只能有一个 <strong>主键</strong> 。</p>
+<p>一般是在建表的时候同时创建主键索引，与之类似的是，<strong>外键索引</strong> ：如果为某个外键字段定义了一个外键约束条件，MySQL 就会定义一个内部索引来帮助自己以最优效率的方式去管理和使用外键约束条件。</p>
+<h3 id="联合索引的最左前缀匹配"><a href="#联合索引的最左前缀匹配" class="headerlink" title="联合索引的最左前缀匹配"></a>联合索引的最左前缀匹配</h3><p>在 MySQL 中不仅可以对某一列建立索引，还可以对多列建立一个联合索引，而联合索引存在一个 <strong>最左前缀匹配</strong> 的概念。下面举个栗子：</p>
+<p>首先创建一张表：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> <span class="string">`user`</span>  (</span><br><span class="line">  <span class="string">`id`</span> <span class="built_in">int</span>(<span class="number">11</span>) <span class="keyword">NOT</span> <span class="literal">NULL</span> AUTO_INCREMENT,</span><br><span class="line">  <span class="string">`age`</span> <span class="built_in">int</span>(<span class="number">5</span>) <span class="literal">NULL</span> <span class="keyword">DEFAULT</span> <span class="literal">NULL</span>,</span><br><span class="line">  <span class="string">`height`</span> <span class="built_in">int</span>(<span class="number">5</span>) <span class="literal">NULL</span> <span class="keyword">DEFAULT</span> <span class="literal">NULL</span>,</span><br><span class="line">  <span class="string">`weight`</span> <span class="built_in">int</span>(<span class="number">5</span>) <span class="literal">NULL</span> <span class="keyword">DEFAULT</span> <span class="literal">NULL</span>,</span><br><span class="line">  <span class="string">`name`</span> <span class="built_in">varchar</span>(<span class="number">20</span>) <span class="built_in">CHARACTER</span> <span class="keyword">SET</span> utf8 <span class="keyword">COLLATE</span> utf8_general_ci <span class="literal">NULL</span> <span class="keyword">DEFAULT</span> <span class="literal">NULL</span>,</span><br><span class="line">  PRIMARY <span class="keyword">KEY</span> (<span class="string">`id`</span>) <span class="keyword">USING</span> BTREE</span><br><span class="line">) <span class="keyword">ENGINE</span> = <span class="keyword">InnoDB</span> AUTO_INCREMENT = <span class="number">1</span> <span class="built_in">CHARACTER</span> <span class="keyword">SET</span> = utf8 <span class="keyword">COLLATE</span> = utf8_general_ci ROW_FORMAT = <span class="keyword">Compact</span>;</span><br></pre></td></tr></table></figure>
+
+<p>然后用 <code>name</code>、<code>age</code>、<code>telephone</code> 建立一个 <strong>联合索引</strong> 。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">alter</span> <span class="keyword">table</span> <span class="keyword">user</span> <span class="keyword">add</span> <span class="keyword">index</span> index_obj(age <span class="keyword">asc</span>, height <span class="keyword">asc</span>, weight <span class="keyword">asc</span>);</span><br></pre></td></tr></table></figure>
+
+<p>索引的数据结构是一棵 <strong>B+Tree</strong> ，<strong>B+Tree</strong> 优化查询效率的其中一个因素就是对数据进行了排序，那么在创建 <code>index_obj</code> 这个索引的时候，也就相当于创建了一棵 <strong>B+Tree</strong> 索引，而这个索引就是 <strong>依据联合索引的成员来进行排序</strong> ，这里是 <code>age</code>、<code>height</code>、<code>weight</code> 。<code>InnoDB</code> 存储引擎主要主键被定义，那么主键就被作为一个 <strong>聚集索引</strong> ，而其它索引都将被作为 <strong>非聚集索引</strong> ，所以自然而然的，这个索引就会是一个 <strong>非聚集索引</strong> 。</p>
+<p>所以根据这些我们可以得出结论：</p>
+<ol>
+<li><code>index_obj</code> 这个索引会根据 <code>age</code>、<code>height</code>、<code>weight</code> 进行排序。</li>
+<li><code>index_obj</code> 这个索引时一个 <strong>非聚集索引</strong> ，查询时需要 <strong>回表</strong> 。</li>
+</ol>
+<p>根据这两个结论，首先需要了解的就是，如何排序？</p>
+<p>单列排序简单，比大小嘛，谁都会，但是 <strong>多列排序时基于什么原则的呢？</strong></p>
+<p>实际上在 MySQL 中，<strong>联合索引</strong> 的排序有这个一个原则，<strong>从左往右依次比较大小</strong> ，就拿刚才建立的索引举栗子，它会先去比较 <code>age</code> 的大小，如果 <code>age</code> 的大小相同，那么比较 <code>height</code> 的大小，如果 <code>height</code> 特无法比较出大小，那么久比较 <code>weight</code> 的大小，最终对这个索引进行排序。</p>
+<p>那么根据这个排序我们也可以画出一个 <strong>B+Tree</strong> ：</p>
+<p>数据：</p>
+<p><img src="http://ww1.sinaimg.cn/large/006Vpl27gy1gb2ylinn9aj30ax06gdg7.jpg" alt="undefined"></p>
+<p><strong>B+Tree：</strong></p>
+<p><img src="http://ww1.sinaimg.cn/large/006Vpl27gy1gb2ylsahq4j30sw0gc0ti.jpg" alt="undefined"></p>
+<blockquote>
+<p>注意：此时由于是 <strong>非聚集索引</strong> ，所以叶子节点不在有数据，而是存了一个 <strong>主键索引</strong> ，最终会通过 <strong>主键索引</strong> 来 <strong>回表</strong> 查询数据。</p>
+</blockquote>
+<p><strong>B+Tree</strong> 的结构有了，就可以通过这个来理解 <strong>最左前缀匹配原则</strong> 了。</p>
+<p>我们先写一个查询语句。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span> <span class="keyword">user</span> <span class="keyword">where</span> age = <span class="number">1</span> <span class="keyword">and</span> height = <span class="number">2</span> <span class="keyword">and</span> weight = <span class="number">7</span></span><br></pre></td></tr></table></figure>
+
+<p>毋庸置疑，这条语句一点会走 <code>index_obj</code> 这个索引，我们可以通过 <code>explain</code> 命令来验证一下。</p>
+<p><img src="http://ww1.sinaimg.cn/large/006Vpl27gy1gb2yrwdjdfj30ln01hglg.jpg" alt="}{LIUTCQ`}6XA%YZQ}R1GDR.png"></p>
+<p>可以看到 <code>key</code> 列显示的是索引 <code>index_obj</code> ，代表实际使用了 <code>index_obj</code> 这个索引。</p>
+<p>那么我们再看一个语句。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span> <span class="keyword">user</span> <span class="keyword">where</span> height = <span class="number">2</span> <span class="keyword">and</span> weight = <span class="number">7</span></span><br></pre></td></tr></table></figure>
+
+<p>思考一下，<strong>这条语句会走索引吗？</strong></p>
+<p><img src="http://ww1.sinaimg.cn/large/006Vpl27gy1gb31rwts98j30jr01gt8j.jpg" alt="image-20200120134041633.png"></p>
+<p>答案是否定的，如上图 <code>type</code> 为 <code>ALL</code>，代表全表扫描，那么我们分析的方向就是，<strong>为什么这条语句不会走索引</strong> 。</p>
+<p><strong>组合索引</strong> 的排序规则是从左到右进行比较然后排序的，而我们的 <code>index_obj</code> 这个索引从左到右依次是 <code>age</code>、<code>height</code>、<code>weight</code> ，所以当我们使用 <code>height</code> 和 <code>weight</code> 来作为查询条件时，由于 <code>age</code> 的缺失，那么就无法从 <code>age</code> 来进行比较了。看到这里可能有小伙伴会有疑问，那 <strong>如果直接用 <code>height</code> 和 <code>weight</code> 来进行比较不可以吗？</strong> 显然是不可以的，可以举个栗子，我们把缺失的这一列写作一个 <strong>问号</strong> ，那么这条语句的查询条件就变成了 <code>?27</code> ，那么我们从这棵 <strong>B+Tree</strong> 的根节点开始，根节点上有127和365，那么以 <code>height</code> 和 <code>weight</code> 来进行比较的话，走的一定是127这一边，但是如果缺失的列数据是大于3的呢？比如427、527、627，那么如果走索引来查询数据，将会丢失数据，<strong>错误查询</strong> 。所以这种情况下绝对 <strong>不会走索引进行查询</strong> 。这就是 <strong>最左前缀匹配的原则的原因</strong> 。</p>
+<blockquote>
+<ul>
+<li>最左前缀匹配原则，MySQL 会一直向右匹配直到遇到范围查询 <strong>&gt;、&lt;、between、like</strong> 就停止匹配，比如 <strong>a=3 and b=4 and c&gt;5 and d=6</strong> ，如果建立 <strong>(a,b,c,d)</strong> 顺序的索引，<strong>d</strong> 是无法使用索引的，如果建立 <strong>a,b,d,c</strong> 的索引则都可以使用到，<strong>a、b、d</strong> 的顺序可以任意调整。</li>
+<li><strong>= 和 in</strong> 可以乱序，比如 <strong>a=1 and b=2 and c=3</strong> 建立 <strong>(a,b,c)</strong> 索引可以任意顺序，MySQL 的查询优化器会帮你优化成索引可以识别的形式。</li>
+</ul>
+</blockquote>
+<p>根据我们了解的可以得出结论：<strong>只要无法进行排序比较大小的，就无法走联合索引</strong> 。</p>
+<p>可以再看几个语句：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span> <span class="keyword">user</span> <span class="keyword">where</span> age = <span class="number">1</span> <span class="keyword">and</span> height = <span class="number">2</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="http://ww1.sinaimg.cn/large/006Vpl27gy1gb30lp9qtyj30lz01hglg.jpg" alt></p>
+<p>如上图，这条语句是可以走 <code>index_obj</code> 索引的，因为它可以通过比较 <code>12? &lt; 365</code> 。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span> <span class="keyword">user</span> <span class="keyword">where</span> age = <span class="number">1</span> <span class="keyword">and</span> weight = <span class="number">7</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="http://ww1.sinaimg.cn/large/006Vpl27gy1gb31rh1xh0j30lp01fmwz.jpg" alt="image-20200120143716713.png"></p>
+<p>如上图，这条语句也是可以走 <code>index_obj</code> 索引的，因为它也可以通过比较 <code>1?7 &lt; 365</code> ，走左子树，但是实际上 <code>weight</code> 并没有用到索引，因为根据 <code>最左匹配原则</code>，如果有两页的 <code>age</code> 都等于1，那么会去比较 <code>height</code> ，但是 <code>height</code> 在这里并不作为查询条件，所以 MySQL 会将这两页全都加载到内存中进行最后的 <code>weight</code> 字段的比较，进行扫描查询。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span> <span class="keyword">user</span> <span class="keyword">where</span> age &gt; <span class="number">1</span></span><br></pre></td></tr></table></figure>
+
+<p>这条语句不会走索引，但是可以走索引。这句话是什么意思呢？这条 SQL 很特殊，由于其存在可以比较的索引，所以它走索引也可以查询出结果，但是由于这种情况是范围查询并且是全字段查询，如果走索引，还需要进行回表，MySQL 查询优化器就会认为走索引的效率比全表扫描还要低，所以 MySQL 回去优化它，让它直接进行全表扫描。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span> <span class="keyword">user</span> <span class="keyword">where</span> age = <span class="number">1</span> <span class="keyword">and</span> height &gt; <span class="number">2</span> <span class="keyword">and</span> weight = <span class="number">7</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="http://ww1.sinaimg.cn/large/006Vpl27gy1gb31r3co3kj30n001ha9w.jpg" alt="image-20200120145731421.png"></p>
+<p>如上图，这条语句是可以走索引的，因为它可以通过 <code>age</code> 进行比较，但是 <code>weight</code> 不会用到索引，因为 <code>height</code> 是范围查找，与第二条语句类似，如果有两页的 <code>height</code> 都大于2，那么 MySQL 会将两页的数据都加载进内存，然后再来通过 <code>weight</code> 匹配正确的数据。</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a href="https://dev.mysql.com/doc/refman/5.7/en/innodb-fulltext-index.html](https://dev.mysql.com/doc/refman/5.7/en/innodb-fulltext-index.html)" target="_blank" rel="noopener">https://dev.mysql.com/doc/refman/5.7/en/innodb-fulltext-index.html](https://dev.mysql.com/doc/refman/5.7/en/innodb-fulltext-index.html)</a></p>
+<p><a href="https://www.javazhiyin.com/40232.html" target="_blank" rel="noopener">https://www.javazhiyin.com/40232.html</a></p>
+<p><a href="https://blog.objectspace.cn/2019/12/10/清空认知，然后重新理解MySQL索引结构/" target="_blank" rel="noopener">https://blog.objectspace.cn/2019/12/10/%E6%B8%85%E7%A9%BA%E8%AE%A4%E7%9F%A5%EF%BC%8C%E7%84%B6%E5%90%8E%E9%87%8D%E6%96%B0%E7%90%86%E8%A7%A3MySQL%E7%B4%A2%E5%BC%95%E7%BB%93%E6%9E%84/</a></p>
+<p><a href="https://juejin.im/post/5d23ef4ce51d45572c0600bc" target="_blank" rel="noopener">https://juejin.im/post/5d23ef4ce51d45572c0600bc</a></p>
+<p><a href="https://zhuanlan.zhihu.com/p/29118331" target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/29118331</a></p>
+<p><a href="https://tech.meituan.com/2014/06/30/mysql-index.html" target="_blank" rel="noopener">https://tech.meituan.com/2014/06/30/mysql-index.html</a></p>
+<p><a href="https://blog.objectspace.cn/2019/09/04/[从入门到入土]令人脱发的数据库底层设计/#密集索引和稀疏索引的区别" target="_blank" rel="noopener">https://blog.objectspace.cn/2019/09/04/%E3%80%90%E4%BB%8E%E5%85%A5%E9%97%A8%E5%88%B0%E5%85%A5%E5%9C%9F%E3%80%91%E4%BB%A4%E4%BA%BA%E8%84%B1%E5%8F%91%E7%9A%84%E6%95%B0%E6%8D%AE%E5%BA%93%E5%BA%95%E5%B1%82%E8%AE%BE%E8%AE%A1/#%E5%AF%86%E9%9B%86%E7%B4%A2%E5%BC%95%E5%92%8C%E7%A8%80%E7%96%8F%E7%B4%A2%E5%BC%95%E7%9A%84%E5%8C%BA%E5%88%AB</a></p>
 
     </article>
     <!-- license  -->
@@ -431,7 +568,7 @@ height:50vh;
             <p>原文作者：<a href="https://github.com/leisurexi">leisurexi</a>
             <p>原文链接：<a href="https://github.com/leisurexi/category/2020/01/21/MySQL/MySQL索引.html">https://github.com/leisurexi/category/2020/01/21/MySQL/MySQL索引.html</a>
             <p>发表日期：<a href="https://github.com/leisurexi/category/2020/01/21/MySQL/MySQL索引.html">January 21st 2020, 9:30:00 pm</a>
-            <p>更新日期：<a href="https://github.com/leisurexi/category/2020/01/21/MySQL/MySQL索引.html">January 21st 2020, 9:30:11 pm</a>
+            <p>更新日期：<a href="https://github.com/leisurexi/category/2020/01/21/MySQL/MySQL索引.html">January 22nd 2020, 9:33:17 pm</a>
             <p>版权声明：本文采用<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
         </div>
     
@@ -570,7 +707,7 @@ top:50vh;
         <div class="toc-catalog">
             <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
         </div>
-        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#前言"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#MySQL索引原理"><span class="toc-number">2.</span> <span class="toc-text">MySQL索引原理</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#索引目的"><span class="toc-number">2.1.</span> <span class="toc-text">索引目的</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#索引原理"><span class="toc-number">2.2.</span> <span class="toc-text">索引原理</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#索引的数据结构"><span class="toc-number">3.</span> <span class="toc-text">索引的数据结构</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#存储结构上划分"><span class="toc-number">3.1.</span> <span class="toc-text">存储结构上划分</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#B-Tree索引"><span class="toc-number">3.1.1.</span> <span class="toc-text">B+Tree索引</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#B-数的查找过程"><span class="toc-number">3.1.1.1.</span> <span class="toc-text">B+数的查找过程</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Hash索引"><span class="toc-number">3.1.2.</span> <span class="toc-text">Hash索引</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Hash索引的限制"><span class="toc-number">3.1.2.1.</span> <span class="toc-text">Hash索引的限制</span></a></li></ol></li></ol></li></ol></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#前言"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#MySQL索引原理"><span class="toc-number">2.</span> <span class="toc-text">MySQL索引原理</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#索引目的"><span class="toc-number">2.1.</span> <span class="toc-text">索引目的</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#索引原理"><span class="toc-number">2.2.</span> <span class="toc-text">索引原理</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#索引"><span class="toc-number">3.</span> <span class="toc-text">索引</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#索引的数据结构"><span class="toc-number">3.1.</span> <span class="toc-text">索引的数据结构</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#二叉查找树"><span class="toc-number">3.1.1.</span> <span class="toc-text">二叉查找树</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#B-Tree"><span class="toc-number">3.1.2.</span> <span class="toc-text">B-Tree</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#B-Tree-1"><span class="toc-number">3.1.3.</span> <span class="toc-text">B+Tree</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Hash索引"><span class="toc-number">3.1.4.</span> <span class="toc-text">Hash索引</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Hash索引的限制"><span class="toc-number">3.1.4.1.</span> <span class="toc-text">Hash索引的限制</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#全文-Full-text-索引"><span class="toc-number">3.1.5.</span> <span class="toc-text">全文 (Full-text) 索引</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#版本支持"><span class="toc-number">3.1.5.1.</span> <span class="toc-text">版本支持</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#使用全文索引"><span class="toc-number">3.1.5.2.</span> <span class="toc-text">使用全文索引</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#聚集索引、覆盖索引"><span class="toc-number">3.2.</span> <span class="toc-text">聚集索引、覆盖索引</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#聚集索引和非聚集索引"><span class="toc-number">3.2.0.1.</span> <span class="toc-text">聚集索引和非聚集索引</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#覆盖索引"><span class="toc-number">3.2.0.2.</span> <span class="toc-text">覆盖索引</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#为什么-InnoDB-只有一个聚集索引，而不将所有索引都使用聚集索引？"><span class="toc-number">3.2.0.3.</span> <span class="toc-text">为什么 InnoDB 只有一个聚集索引，而不将所有索引都使用聚集索引？</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#索引类型"><span class="toc-number">3.3.</span> <span class="toc-text">索引类型</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#普通索引"><span class="toc-number">3.3.1.</span> <span class="toc-text">普通索引</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#唯一索引"><span class="toc-number">3.3.2.</span> <span class="toc-text">唯一索引</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#主键索引"><span class="toc-number">3.3.3.</span> <span class="toc-text">主键索引</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#联合索引的最左前缀匹配"><span class="toc-number">3.3.4.</span> <span class="toc-text">联合索引的最左前缀匹配</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#参考"><span class="toc-number">4.</span> <span class="toc-text">参考</span></a></li></ol>
     </div>
     
     <div class="back-top iconfont-archer">&#xe639;</div>
@@ -583,6 +720,8 @@ top:50vh;
     <div class="sidebar-content sidebar-content-show-archive">
           <div class="sidebar-panel-archives">
     <!-- 在ejs中将archive按照时间排序 -->
+    
+    
     
     
     
@@ -865,15 +1004,15 @@ top:50vh;
     
         <span class="sidebar-tag-name" data-tags="CentOS 7"><span class="iconfont-archer">&#xe606;</span>CentOS 7</span>
     
+        <span class="sidebar-tag-name" data-tags="设计模式"><span class="iconfont-archer">&#xe606;</span>设计模式</span>
+    
         <span class="sidebar-tag-name" data-tags="MySQL"><span class="iconfont-archer">&#xe606;</span>MySQL</span>
     
-        <span class="sidebar-tag-name" data-tags="设计模式"><span class="iconfont-archer">&#xe606;</span>设计模式</span>
+        <span class="sidebar-tag-name" data-tags="RabbitMQ"><span class="iconfont-archer">&#xe606;</span>RabbitMQ</span>
     
         <span class="sidebar-tag-name" data-tags="并发"><span class="iconfont-archer">&#xe606;</span>并发</span>
     
         <span class="sidebar-tag-name" data-tags="集合"><span class="iconfont-archer">&#xe606;</span>集合</span>
-    
-        <span class="sidebar-tag-name" data-tags="RabbitMQ"><span class="iconfont-archer">&#xe606;</span>RabbitMQ</span>
     
         <span class="sidebar-tag-name" data-tags="Redis"><span class="iconfont-archer">&#xe606;</span>Redis</span>
     
@@ -912,15 +1051,15 @@ jsonContent:
     
         <span class="sidebar-category-name" data-categories="CentOS-7"><span class="iconfont-archer">&#xe60a;</span>CentOS-7</span>
     
+        <span class="sidebar-category-name" data-categories="设计模式"><span class="iconfont-archer">&#xe60a;</span>设计模式</span>
+    
         <span class="sidebar-category-name" data-categories="MySQL"><span class="iconfont-archer">&#xe60a;</span>MySQL</span>
     
-        <span class="sidebar-category-name" data-categories="设计模式"><span class="iconfont-archer">&#xe60a;</span>设计模式</span>
+        <span class="sidebar-category-name" data-categories="RabbitMQ"><span class="iconfont-archer">&#xe60a;</span>RabbitMQ</span>
     
         <span class="sidebar-category-name" data-categories="并发"><span class="iconfont-archer">&#xe60a;</span>并发</span>
     
         <span class="sidebar-category-name" data-categories="集合"><span class="iconfont-archer">&#xe60a;</span>集合</span>
-    
-        <span class="sidebar-category-name" data-categories="RabbitMQ"><span class="iconfont-archer">&#xe60a;</span>RabbitMQ</span>
     
         <span class="sidebar-category-name" data-categories="Redis"><span class="iconfont-archer">&#xe60a;</span>Redis</span>
     
