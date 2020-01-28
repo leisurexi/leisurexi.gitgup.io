@@ -22,7 +22,7 @@
     <meta name="description" content="此行一入深似海，从此红尘是路人。">
     <meta http-equiv="Cache-control" content="no-cache">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <title>leisurexi&#39;s Blog</title>
+    <title>JVM垃圾收集相关的常用参数 · leisurexi&#39;s Blog</title>
     <style type="text/css">
     @font-face {
         font-family: 'Oswald-Regular';
@@ -77,6 +77,8 @@
 
     <link rel="preload" href="/css/style.css?v=20180824" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <link rel="stylesheet" href="/css/mobile.css?v=20180824" media="(max-width: 980px)">
+    
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     
     <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
 /* This file is meant as a standalone workflow for
@@ -201,14 +203,23 @@
 </head>
 
     
-        <body class="home-body">
+        <body class="post-body">
     
     
-<header class="header index-header">
+<header class="header">
 
     <div class="read-progress"></div>
     <div class="header-sidebar-menu">&#xe775;</div>
     <!-- post页的toggle banner  -->
+    
+    <div class="banner">
+            <div class="blog-title">
+                <a href="/" >leisurexi&#39;s Blog.</a>
+            </div>
+            <div class="post-title">
+                <a href="#" class="post-name">JVM垃圾收集相关的常用参数</a>
+            </div>
+    </div>
     
     <a class="home-link" href=/>leisurexi's Blog.</a>
 </header>
@@ -227,17 +238,17 @@ height:50vh;
     <!-- 主页  -->
     
     
-    <!-- 文章页  -->
+    <!-- 404页  -->
             
     <div class="site-intro-placeholder"></div>
-    <div class="site-intro-img" style="background-image: url(/intro/index-bg.jpg)"></div>
+    <div class="site-intro-img" style="background-image: url(/intro/post-bg.jpg)"></div>
     <div class="site-intro-meta">
         <!-- 标题  -->
         <h1 class="intro-title">
             <!-- 主页  -->
             
-            leisurexi's Blog.
-            <!-- 文章页  -->
+            JVM垃圾收集相关的常用参数
+            <!-- 404 -->
             
         </h1>
         <!-- 副标题 -->
@@ -245,12 +256,49 @@ height:50vh;
             <!-- 主页副标题  -->
             
             
-                此行一入深似海，从此红尘是路人
-            
-            <!-- 文章页  -->
+            <!-- 404 -->
             
         </p>
         <!-- 文章页meta -->
+        
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                
+                    <div class= post-intro-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "JVM">JVM</a>
+    
+</div>
+                
+                
+                    <div class="post-intro-read">
+                        <span>字数统计: <span class="post-count word-count">582</span>阅读时长: <span class="post-count reading-time">2 min</span></span>
+                    </div>
+                
+                <div class="post-intro-meta">
+                    <span class="post-intro-calander iconfont-archer">&#xe676;</span>
+                    <span class="post-intro-time">2020/01/28</span>
+                    
+                    <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                        <span class="iconfont-archer">&#xe602;</span>
+                        <span id="busuanzi_value_page_pv"></span>
+                    </span>
+                    
+                    <span class="shareWrapper">
+                        <span class="iconfont-archer shareIcon">&#xe71d;</span>
+                        <span class="shareText">Share</span>
+                        <ul class="shareList">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
         
     </div>
 </div>
@@ -351,300 +399,76 @@ height:50vh;
 </script>        
         <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
         <div class="container container-unloaded">
-            <main class="main index-page">
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href = "/category/2019/08/10/CentOS 7/CentOS 7下Zookeeper和Kafka集群搭建.html" >
-            
-                <span>CentOS 7下Zookeeper和Kafka集群搭建</span>
-        </a>
-        <div class="abstract-content">
-            <p>本篇文章主要介绍在CentOS 7环境下搭建zk和kafka集群，先默认你已经安装好zookeeper和kafkaf；我的zookeeper版本是3.4.13，kafka版本是2.11-2.1.1。</p>
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/08/10</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class= abstract-tags >
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags = "CentOS 7">CentOS 7</a>
-    
-</div>
-            
-        </div>
+            <main class="main post-page">
+    <article class="article-entry">
+        <p>本篇文章主要介绍 JVM 垃圾收集相关的常用参数。</p>
+<a id="more"></a>
+
+<ul>
+<li><strong>UseSerialGC：</strong> 虚拟机运行在 <strong>Client</strong> 模式下的默认值，打开此开关后，使用 <code>Serial + Serial Old</code> 的收集器组合进行内存回收。</li>
+<li><strong>UseParNewGC：</strong> 打开此开关后，使用 <code>ParNew + Serial Old</code> 的收集器组合进行内存回收。</li>
+<li><strong>UseConcMarkSweepGC：</strong> 打开此开关后，使用 <code>ParNew + CMS + Serial Old</code> 的收集器组合进行内存回收。<code>Serial Old</code> 收集器将作为 <code>CMS</code> 收集器出现 <code>Concurent Mode Failure</code> 失败后的后备收集器使用。</li>
+<li><strong>UseParallelGC：</strong> 虚拟机运行在 <strong>Server</strong> 模式下的默认值，打开此开关后，使用 <code>Parallel Scavenge + Serial Old (PS MarkSweep)</code> 的收集器组合进行内存回收。</li>
+<li><strong>UseParallelOldGC：</strong> 打开此开关后，使用 <code>Parallel Scavenge + Parallel Old</code> 的收集器组合记性内存回收。</li>
+<li><strong>SurvivorRatio：</strong> 新生代中 <code>Eden</code> 区域与 <code>Survivor</code> 区域的容量比值，默认为 <strong>8</strong> ，代表 <code>Eden : Survivor = 8: 1</code> 。</li>
+<li><strong>PretenureSizeThreshold：</strong> 直接晋升到老年代的对象大小，设置这个参数后，大于这个参数得对象将直接在老年代分配。</li>
+<li><strong>MaxTenuringThreshold：</strong> 晋升到老年代的对象年龄。每个对象在坚持过一次 <code>Minor GC</code> 之后，年龄就加 <strong>1</strong> ，当超过这个参数值时就进入老年代。</li>
+<li><strong>UseAdaptiveSizePolicy：</strong> 动态调整 <strong>Java</strong> 堆中各个区域的大小以及进入老年代的年龄。</li>
+<li><strong>HandlePromotionFailure：</strong> 是否允许分配担保失败，即老年代的剩余空间不足以应付新生代的整个 <code>Eden</code> 和 <code>Survivor</code> 区的所有对象都存活的极端情况。</li>
+<li><strong>ParallelGCThreads：</strong> 设置并行 <strong>GC</strong> 时进行内存回收的线程数。</li>
+<li><strong>GCTimeRatio：</strong> <strong>GC</strong> 时间占总时间的比率，默认值为 <strong>99</strong> ，即允许 <strong>1%</strong> 的 <strong>GC</strong> 时间。仅在使用 <code>Parallel Scavenge</code> 收集器时生效。</li>
+<li><strong>MaxGCPauseMillis：</strong> 设置 <strong>GC</strong> 的最大停顿时间。仅在使用 <code>Parallel Scavenge</code> 收集器时生效。</li>
+<li><strong>CMSInitiatingOccupancyFraction：</strong> 设置 <strong>CMS</strong> 收集器在老年代空间被使用多少后出发垃圾收集。默认值为 <strong>68%</strong> ，仅在使用 <strong>CMS</strong> 收集器时生效。</li>
+<li><strong>UseCMSCompactAtFullCollection：</strong> 设置 <strong>CMS</strong> 收集器在完成垃圾收集后是否要进行一次内存碎片整理。仅在使用 <strong>CMS</strong> 收集器时生效。</li>
+<li><strong>CMSFullGCsBeforeCompaction：</strong> 设置 <strong>CMS</strong> 收集器在进行若干次垃圾收集后再启动一次内存碎片整理。仅在使用 <strong>CMS</strong> 收集器时生效。</li>
+</ul>
+
     </article>
+    <!-- license  -->
     
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href = "/category/2019/05/28/集合/LinkedList.html" >
-            
-                <span>LinkedList</span>
-        </a>
-        <div class="abstract-content">
-            <p>LinkedList是一个以双向链表实现的List，它除了作为List使用，还可以作为队列或者堆栈使用。</p>
+        <div class="license-wrapper">
+            <p>原文作者：<a href="https://github.com/leisurexi">leisurexi</a>
+            <p>原文链接：<a href="https://github.com/leisurexi/category/2020/01/28/JVM/JVM垃圾收集相关的常用参数.html">https://github.com/leisurexi/category/2020/01/28/JVM/JVM垃圾收集相关的常用参数.html</a>
+            <p>发表日期：<a href="https://github.com/leisurexi/category/2020/01/28/JVM/JVM垃圾收集相关的常用参数.html">January 28th 2020, 9:45:00 am</a>
+            <p>更新日期：<a href="https://github.com/leisurexi/category/2020/01/28/JVM/JVM垃圾收集相关的常用参数.html">January 28th 2020, 9:46:45 am</a>
+            <p>版权声明：本文采用<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
         </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/05/28</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class= abstract-tags >
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags = "集合">集合</a>
-    
-</div>
-            
-        </div>
-    </article>
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href = "/category/2019/05/26/设计模式/单例模式.html" >
-            
-                <span>单例模式</span>
-        </a>
-        <div class="abstract-content">
-            <p>单例模式（Singletom Pattern），保证一个类仅有一个实例，并提供一个访问它的全局访问点。</p>
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/05/26</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class= abstract-tags >
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags = "设计模式">设计模式</a>
-    
-</div>
-            
-        </div>
-    </article>
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href = "/category/2019/05/26/设计模式/迭代器模式.html" >
-            
-                <span>迭代器模式</span>
-        </a>
-        <div class="abstract-content">
-            <p>迭代器模式（Iterator Pattern），提供一种方法顺序访问一个聚合对象中各个元素，而又不暴露该对象的内部。迭代器模式属于行为型模式。</p>
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/05/26</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class= abstract-tags >
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags = "设计模式">设计模式</a>
-    
-</div>
-            
-        </div>
-    </article>
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href = "/category/2019/05/18/集合/ArrayList.html" >
-            
-                <span>ArrayList</span>
-        </a>
-        <div class="abstract-content">
-            <p>这章开始我们对Collection的具体实现类来进行介绍，首先是List，而List中ArrayList是最常用的。</p>
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/05/18</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class= abstract-tags >
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags = "集合">集合</a>
-    
-</div>
-            
-        </div>
-    </article>
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href = "/category/2019/05/18/集合/Collection.html" >
-            
-                <span>Collection</span>
-        </a>
-        <div class="abstract-content">
-            <p>Collection是一个接口，是高度抽象出来的集合，它包含了集合的基本操作和属性。</p>
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/05/18</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class= abstract-tags >
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags = "集合">集合</a>
-    
-</div>
-            
-        </div>
-    </article>
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href = "/category/2019/05/16/设计模式/备忘录模式.html" >
-            
-                <span>备忘录模式</span>
-        </a>
-        <div class="abstract-content">
-            <p>备忘录模式（Memento Pattern）保存一个对象的某个状态，以便在适当的时候恢复对象。备忘录模式属于行为型模式。</p>
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/05/16</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class= abstract-tags >
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags = "设计模式">设计模式</a>
-    
-</div>
-            
-        </div>
-    </article>
     
     <!-- paginator  -->
-    
-    <nav class="page-nav">
-        <a class="extend prev" rel="prev" href="/">&#60; PREV</a><a class="page-number" href="/">1</a><span class="page-number current">2</span>
-    </nav>
-    
-</main>
-            <!-- profile -->
+    <ul class="post-paginator">
+        <li class="next">
             
-            <div class="profile">
-    <img class="profile-avatar" alt="avatar" src= /avatar/Misaka.jpg >
-    <div class="profile-name">leisurexi</div>
-    
-    <div class="profile-signature">
-        I want to sleep.
-    </div>
-    
-    
-    <div class="profile-social">
-        
-    
-        
+                <div class="nextSlogan">Next Post</div>
+                <a href= "/category/2020/01/28/JVM/JVM 类加载机制.html" title= "JVM 类加载机制">
+                    <div class="nextTitle">JVM 类加载机制</div>
+                </a>
             
-                <a href="mailto:leisurexi@gmail.com" class="iconfont-archer email" title=email ></a>
+        </li>
+        <li class="previous">
             
-        
-    
-        
+                <div class="prevSlogan">Previous Post</div>
+                <a href= "/category/2020/01/21/MySQL/MySQL索引.html" title= "MySQL索引">
+                    <div class="prevTitle">MySQL索引</div>
+                </a>
             
-                <a href="https://github.com/leisurexi" class="iconfont-archer github" target="_blank" title=github></a>
-            
-        
+        </li>
+    </ul>
+    <!-- 评论插件 -->
+    <!-- 来必力City版安装代码 -->
+
+<!-- City版安装代码已完成 -->
     
-        
-            
-                <span class="iconfont-archer wechat" title=wechat>
-                  
-                  <img class="profile-qr" src="/assets/wechat.png" />
-                </span>
-            
-        
     
-        
-            
-                <span class="iconfont-archer qq" title=qq>
-                  
-                  <img class="profile-qr" src="/assets/qq.png" />
-                </span>
-            
-        
+    <!-- partial('_partial/comment/changyan') -->
+    <!--PC版-->
+
+
     
-        
-    
-        
-    
-        
-    
-        
-    
-        
-    
-        
-    
-        
-    
-        
-    
-        
-    
-        
-    
-        
-    
-        
-    
-        
-    
-        
-    
-        
-    
-        
     
 
-    </div>
-    
-    
-    
-</div>
+    <!-- 评论 -->
+</main>
+            <!-- profile -->
             
         </div>
         <footer class="footer footer-unloaded">
@@ -734,6 +558,24 @@ height:50vh;
 </footer>
     </div>
     <!-- toc -->
+    
+    <div class="toc-wrapper" style=
+    
+
+
+
+
+
+
+
+top:50vh;
+
+    >
+        <div class="toc-catalog">
+            <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+        </div>
+        
+    </div>
     
     <div class="back-top iconfont-archer">&#xe639;</div>
     <div class="sidebar sidebar-hide">
@@ -1136,6 +978,8 @@ jsonContent:
     
     </div>
     <!-- async load share.js -->
+    
+        <script src="/scripts/share.js" async></script>    
      
     <script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/assets/koharu.model.json"},"display":{"position":"left","width":150,"height":300,"hOffset":75},"mobile":{"show":true},"react":{"opacity":0.7},"log":false});</script></body>
 </html>
