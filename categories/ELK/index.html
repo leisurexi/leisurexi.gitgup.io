@@ -22,7 +22,7 @@
     <meta name="description" content="此行一入深似海，从此红尘是路人。">
     <meta http-equiv="Cache-control" content="no-cache">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <title>Java虚拟机性能监控和故障处理工具 · leisurexi&#39;s Blog</title>
+    <title>leisurexi&#39;s Blog</title>
     <style type="text/css">
     @font-face {
         font-family: 'Oswald-Regular';
@@ -203,23 +203,12 @@
 </head>
 
     
-        <body class="post-body">
-    
     
 <header class="header">
 
     <div class="read-progress"></div>
     <div class="header-sidebar-menu">&#xe775;</div>
     <!-- post页的toggle banner  -->
-    
-    <div class="banner">
-            <div class="blog-title">
-                <a href="/" >leisurexi&#39;s Blog.</a>
-            </div>
-            <div class="post-title">
-                <a href="#" class="post-name">Java虚拟机性能监控和故障处理工具</a>
-            </div>
-    </div>
     
     <a class="home-link" href=/>leisurexi's Blog.</a>
 </header>
@@ -231,74 +220,24 @@
 
 
 
-
-height:50vh;
 ">
     
     <!-- 主页  -->
-    
-    
-    <!-- 404页  -->
             
     <div class="site-intro-placeholder"></div>
-    <div class="site-intro-img" style="background-image: url(/intro/post-bg.jpg)"></div>
+    <div class="site-intro-img" style="background-image: url(/)"></div>
     <div class="site-intro-meta">
         <!-- 标题  -->
         <h1 class="intro-title">
             <!-- 主页  -->
-            
-            Java虚拟机性能监控和故障处理工具
-            <!-- 404 -->
             
         </h1>
         <!-- 副标题 -->
         <p class="intro-subtitle">
             <!-- 主页副标题  -->
             
-            
-            <!-- 404 -->
-            
         </p>
         <!-- 文章页meta -->
-        
-            <div class="post-intros">
-                <!-- 文章页标签  -->
-                
-                    <div class= post-intro-tags >
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags = "JVM">JVM</a>
-    
-</div>
-                
-                
-                    <div class="post-intro-read">
-                        <span>字数统计: <span class="post-count word-count">1.3k</span>阅读时长: <span class="post-count reading-time">4 min</span></span>
-                    </div>
-                
-                <div class="post-intro-meta">
-                    <span class="post-intro-calander iconfont-archer">&#xe676;</span>
-                    <span class="post-intro-time">2020/02/01</span>
-                    
-                    <span id="busuanzi_container_page_pv" class="busuanzi-pv">
-                        <span class="iconfont-archer">&#xe602;</span>
-                        <span id="busuanzi_value_page_pv"></span>
-                    </span>
-                    
-                    <span class="shareWrapper">
-                        <span class="iconfont-archer shareIcon">&#xe71d;</span>
-                        <span class="shareText">Share</span>
-                        <ul class="shareList">
-                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
-                                <div class="share-qrcode"></div>
-                            </li>
-                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
-                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
-                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
-                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
-                        </ul>
-                    </span>
-                </div>
-            </div>
         
     </div>
 </div>
@@ -399,102 +338,39 @@ height:50vh;
 </script>        
         <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
         <div class="container container-unloaded">
-            <main class="main post-page">
-    <article class="article-entry">
-        <p>本篇文章主要介绍 Java 虚拟机性能监控和</p>
-<a id="more"></a>
-
-<h1 id="JDK-的命令行工具"><a href="#JDK-的命令行工具" class="headerlink" title="JDK 的命令行工具"></a>JDK 的命令行工具</h1><h2 id="jps-虚拟机进程状况工具"><a href="#jps-虚拟机进程状况工具" class="headerlink" title="jps (虚拟机进程状况工具)"></a>jps (虚拟机进程状况工具)</h2><p>它的功能和 <code>ps</code> 命令类似：可以列出正在运行的虚拟机进程，并显示虚拟机执行主类 (<code>Main Class</code> ，<code>main()</code> 函数所在的类) 的名称，以及这些进程的本地虚拟机的唯一 <strong>ID (LVMID，Local Virtual Machine Identifier)</strong> 。对于本地虚拟机进程来说，<strong>LVMID</strong> 与操作系统的进程 <strong>ID (PID，Process Identifier)</strong> 是一致的。但是如果同时启动了多个虚拟机进程，无法根据进程名称定位时，那就只能依赖 <strong>jps</strong> 命令显示主类的功能才能区分了。</p>
-<p>命令格式：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jsp [ options ] [ hostid ]</span><br></pre></td></tr></table></figure>
-
-<p>执行样例：</p>
-<p><img src="http://ww1.sinaimg.cn/large/006Vpl27ly1gb5ozpli72j310u04gt9x.jpg" alt="D5315344-4FD4-4D9F-8F46-F950C00A5313.png"></p>
-<p><strong>jps</strong> 可以通过 <strong>RMI</strong> 协议查询开启了 <strong>RMI</strong> 服务的远程虚拟机进程状态，<code>hostid</code> 为 <strong>RMI</strong> 注册表中注册的主机名。<strong>jps</strong> 的其它常用选项命令参数：</p>
-<p><img src="http://ww1.sinaimg.cn/large/006Vpl27ly1gb5p1ynjwvj31va0h40vw.jpg" alt="B3C4D364-4D38-4CAD-9EB1-229D3C4790F2.png"></p>
-<h2 id="jstat-虚拟机统计信息监视工具"><a href="#jstat-虚拟机统计信息监视工具" class="headerlink" title="jstat (虚拟机统计信息监视工具)"></a>jstat (虚拟机统计信息监视工具)</h2><p>主要用于监视虚拟机各种运行状态信息。它可以显示本地或远程虚拟机进程中的类装载、内存、垃圾收集、<strong>JIT</strong> 编译等运行数据，在没有 <strong>GUI</strong> 图形界面，只提供了纯文本控制台环境的服务器上，它将是运行期定位虚拟机性能问题的首选工具。</p>
-<p>命令格式：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jstat [ option vmid [interval[s|ms] [count]] ]</span><br></pre></td></tr></table></figure>
-
-<p>对于命令格式中的 <strong>VMID</strong> 与 <strong>LVMID</strong> 需要特别说明一下：如果是本地虚拟机进程，<strong>VMID</strong> 与 <strong>LVMID</strong> 是一致的，如果是远程虚拟机进程，那 <strong>VMID</strong> 的格式应当是：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[protocol:][//]lvmid[@hostname[:port]/servername]</span><br></pre></td></tr></table></figure>
-
-<p>参数 <code>interval</code> 和 <code>count</code> 代表查询间隔和次数，如果省略这两个参数，说明只查询一次。假设需要每 250 毫秒查询一次进程 2764 垃圾收集的状况，一共查询 20 次，那命令应当是：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jstat -gc 2764 250 20</span><br></pre></td></tr></table></figure>
-
-<p>选项 <code>option</code> 代表用户希望查询的虚拟机信息，主要分为 3 类：<strong>类加载</strong>、<strong>垃圾收集</strong> 和 <strong>运行期编辑</strong> 状况，具体选项及作用参考下图：</p>
-<p><img src="http://ww1.sinaimg.cn/large/006Vpl27ly1gb5ped1wpaj31wa0ymdoi.jpg" alt="4AE6DE5C-962E-4DA0-901B-E0FC0A008F55.png"></p>
-<p>这里拿一台线上运行服务器的内存状况的例子来演示如何查看监视结果。如下图：</p>
-<p><img src="http://ww1.sinaimg.cn/large/006Vpl27ly1gb5ptde7zvj30wi02cwf0.jpg" alt="A046FAFD-BEC0-4D34-AC30-8C81A43D148B.png"></p>
-<p>查询结果表明：这台服务器的新生代 <strong>Eden</strong> 去 (E，表示 <strong>Eden</strong>) 使用了 73.68% 的空间，两个 <strong>Survivor</strong> 区 (S0、S1，表示 <strong>Survivor0、Survovor1</strong>) 里面都是空的，老年代 (O，表示 <strong>Old</strong>) 和元数据区 (M，表示 <strong>Metaspace</strong>) 则分别使用 33.44% 和 84.28% 的空间。程序运行依赖共发生 <strong>Minor GC</strong> (YGC，表示 <strong>Young GC</strong>) 52125 次，总耗时 248.312 秒，发生 <strong>Full GC</strong> (FGC，表示 <strong>Full GC</strong>) 8次，<strong>Full GC</strong> 总耗时 1.134 秒，所有 <strong>GC</strong> 总耗时 (GCT，表示 <strong>GC Time</strong>) 为 249.446 秒。</p>
-<h2 id="jinfo-Java配置信息工具"><a href="#jinfo-Java配置信息工具" class="headerlink" title="jinfo (Java配置信息工具)"></a>jinfo (Java配置信息工具)</h2><p>该工具的主要作用是实时地查看和调整虚拟机的各项参数。使用 <strong>jps</strong> 命令的 <strong>-v</strong> 参数可以查看虚拟机启动时显示指定的参数列表，但如果想知道未被显式指定的参数的系统的系统默认值，除了去找资料外，就只能使用 <strong>jinfo</strong> 的 <strong>-flag</strong> 选项进行查询了 (如果只限于 JDK 1.6 或以上版本的话，使用 <code>java -XX:+PrintFlagsFinal</code> 查看参数默认值也是一个很好的选择)，<strong>jinfo</strong> 还可以使用 <strong>-sysprops</strong> 选项把虚拟机进程的 <code>System.getProperties()</code> 的内容打印出来。</p>
-<p>命令格式：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jinfo [ option ] pid</span><br></pre></td></tr></table></figure>
-
-<p>执行样例：</p>
-<p><img src="http://ww1.sinaimg.cn/large/006Vpl27ly1gb6dzt04g6j31qy05m0x3.jpg" alt="C492040A-9CE4-4F86-999D-31E68402ED86.png"></p>
-<h2 id="jmap-Java-内存映像工具"><a href="#jmap-Java-内存映像工具" class="headerlink" title="jmap (Java 内存映像工具)"></a>jmap (Java 内存映像工具)</h2><p>该工具用于生产堆转储快照 (一般称为 <strong>heapdump</strong> 或 <strong>dump</strong> 文件)。如果不使用 <strong>jmap</strong> 命令，要想获取 Java 堆转储快照还有一些比较 ”暴力“ 的手段：譬如增加虚拟机启动参数 <code>-xx:+HeapDumpOnOutOfMemoryError</code> 参数，可以让虚拟机在 <strong>OOM</strong> 异常出现之后自动生成 <strong>dump</strong> 文件，通过 <code>-XX:+HeapDumpOnCtrlBreak</code> 参数则可以使用 <code>Ctrl + Break</code> 键让虚拟机生成 <strong>dump</strong> 文件，又或者在 Linux 系统下通过 <code>Kill -3</code> 命令发送进程退出信号 ”恐吓“ 一下虚拟机，也能拿到 <strong>dump</strong> 文件。</p>
-<p><strong>jmap</strong> 的作用并不仅仅是为了获取 <strong>dump</strong> 文件，它还可以查询 <code>finalize</code> 执行队列， Java 堆和永久代的详细信息，如空间使用率、当前使用的是哪种收集器等。</p>
-<p>命令格式：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jmap [ option ] vmid</span><br></pre></td></tr></table></figure>
-
-<p><code>option</code> 选项的合法值与具体含义：</p>
-<p><img src="http://ww1.sinaimg.cn/large/006Vpl27ly1gb6eb3vovhj31xi0rqagl.jpg" alt="0BEFAB0E-0ACF-4DB1-A8DC-D63A3365FC8E.png"></p>
-<p>执行样例：</p>
-<p><img src="http://ww1.sinaimg.cn/large/006Vpl27ly1gb6eeor9y2j31wc0j2jvj.jpg" alt="8885A4C5-5F1B-4016-93A7-A9095615B101.png"></p>
-<h2 id="jstack-Java-堆栈跟踪工具"><a href="#jstack-Java-堆栈跟踪工具" class="headerlink" title="jstack (Java 堆栈跟踪工具)"></a>jstack (Java 堆栈跟踪工具)</h2><p>该工具用于生产虚拟机当前时刻的线程快照 (一般称为 <strong>threaddump</strong> 或 <strong>javacore</strong> 文件)。线程快照就是当前虚拟机内每一条线程正在执行的方法堆栈的集合，生产线程快照的只要目的是定位线程出现长时间停顿的原因，如 <strong>线程死锁、死循环、请求外部资源导致的长时间等待</strong> 等都是导致线程长时间停顿的常见原因。</p>
-<p>命令格式：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jstack [ option ] vmid</span><br></pre></td></tr></table></figure>
-
-<p><code>option</code> 选项的合法值与具体含义：</p>
-<p><img src="http://ww1.sinaimg.cn/large/006Vpl27ly1gb6el5817wj31we0e0418.jpg" alt="7D7E9A79-7894-457D-BC81-18A131F786A2.png"></p>
-<p>执行样例：</p>
-<p><img src="http://ww1.sinaimg.cn/large/006Vpl27ly1gb6emypv3mj31g40skk3e.jpg" alt="4C4D1D4E-0B85-42F9-BA29-6502FD78F647.png"></p>
-
-    </article>
-    <!-- license  -->
+            <main class="main index-page">
     
-        <div class="license-wrapper">
-            <p>原文作者：<a href="https://github.com/leisurexi">leisurexi</a>
-            <p>原文链接：<a href="https://github.com/leisurexi/category/2020/02/01/JVM/Java虚拟机性能监控和故障处理工具.html">https://github.com/leisurexi/category/2020/02/01/JVM/Java虚拟机性能监控和故障处理工具.html</a>
-            <p>发表日期：<a href="https://github.com/leisurexi/category/2020/02/01/JVM/Java虚拟机性能监控和故障处理工具.html">February 1st 2020, 4:14:00 pm</a>
-            <p>更新日期：<a href="https://github.com/leisurexi/category/2020/02/01/JVM/Java虚拟机性能监控和故障处理工具.html">February 1st 2020, 4:28:23 pm</a>
-            <p>版权声明：本文采用<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+    
+    
+    
+    
+    
+    <article class="index-post">
+        <a class="abstract-title" href = "/category/2020/04/26/ELK/Docker 搭建ELK集群步骤.html" >
+            
+                <span>Docker 搭建 ELK 集群步骤</span>
+        </a>
+        <div class="abstract-content">
+            <p>本篇文章主要介绍在 CentOS 7 上使用 Docker 搭建 ELK。</p>
         </div>
+        <div class="abstract-post-meta">
+            <!-- date  -->
+            <div class="abstract-date">
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2020/04/26</span>
+            </div>
+            <!-- tags  -->
+            
+            <div class= abstract-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "ELK">ELK</a>
+    
+</div>
+            
+        </div>
+    </article>
     
     <!-- paginator  -->
-    <ul class="post-paginator">
-        <li class="next">
-            
-                <div class="nextSlogan">Next Post</div>
-                <a href= "/category/2020/04/14/Spring IoC/Spring XML Bean 定义的加载和注册.html" title= "Spring XML Bean 定义的加载和注册">
-                    <div class="nextTitle">Spring XML Bean 定义的加载和注册</div>
-                </a>
-            
-        </li>
-        <li class="previous">
-            
-                <div class="prevSlogan">Previous Post</div>
-                <a href= "/category/2020/01/28/JVM/JVM 类加载机制.html" title= "JVM 类加载机制">
-                    <div class="prevTitle">JVM 类加载机制</div>
-                </a>
-            
-        </li>
-    </ul>
-    <!-- 评论插件 -->
-    <!-- 来必力City版安装代码 -->
-
-<!-- City版安装代码已完成 -->
     
-    
-    <!-- partial('_partial/comment/changyan') -->
-    <!--PC版-->
-
-
-    
-    
-
-    <!-- 评论 -->
 </main>
             <!-- profile -->
             
@@ -586,24 +462,6 @@ height:50vh;
 </footer>
     </div>
     <!-- toc -->
-    
-    <div class="toc-wrapper" style=
-    
-
-
-
-
-
-
-
-top:50vh;
-
-    >
-        <div class="toc-catalog">
-            <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
-        </div>
-        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#JDK-的命令行工具"><span class="toc-number">1.</span> <span class="toc-text">JDK 的命令行工具</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#jps-虚拟机进程状况工具"><span class="toc-number">1.1.</span> <span class="toc-text">jps (虚拟机进程状况工具)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#jstat-虚拟机统计信息监视工具"><span class="toc-number">1.2.</span> <span class="toc-text">jstat (虚拟机统计信息监视工具)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#jinfo-Java配置信息工具"><span class="toc-number">1.3.</span> <span class="toc-text">jinfo (Java配置信息工具)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#jmap-Java-内存映像工具"><span class="toc-number">1.4.</span> <span class="toc-text">jmap (Java 内存映像工具)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#jstack-Java-堆栈跟踪工具"><span class="toc-number">1.5.</span> <span class="toc-text">jstack (Java 堆栈跟踪工具)</span></a></li></ol></li></ol>
-    </div>
     
     <div class="back-top iconfont-archer">&#xe639;</div>
     <div class="sidebar sidebar-hide">
@@ -1122,8 +980,6 @@ jsonContent:
     
     </div>
     <!-- async load share.js -->
-    
-        <script src="/scripts/share.js" async></script>    
      
     <script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/assets/koharu.model.json"},"display":{"position":"left","width":150,"height":300,"hOffset":75},"mobile":{"show":true},"react":{"opacity":0.7},"log":false});</script></body>
 </html>

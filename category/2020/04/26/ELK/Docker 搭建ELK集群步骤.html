@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+    <!-- title -->
+
+
+
+
+<!-- keywords -->
+
+
+
+
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="author" content="leisurexi">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="leisurexi">
+    
+    <meta name="keywords" content="hexo,hexo-theme,hexo-blog">
+    
+    <meta name="description" content="此行一入深似海，从此红尘是路人。">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Docker 搭建 ELK 集群步骤 · leisurexi&#39;s Blog</title>
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .back-top,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(-45deg, #444 0, #444 80px, #333 80px, #333 160px);
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s infinite;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+
+</style>
+
+    <link rel="preload" href="/css/style.css?v=20180824" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="stylesheet" href="/css/mobile.css?v=20180824" media="(max-width: 980px)">
+    
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+(function( w ){
+	"use strict";
+	// rel=preload support test
+	if( !w.loadCSS ){
+		w.loadCSS = function(){};
+	}
+	// define on the loadCSS obj
+	var rp = loadCSS.relpreload = {};
+	// rel=preload feature support test
+	// runs once and returns a function for compat purposes
+	rp.support = (function(){
+		var ret;
+		try {
+			ret = w.document.createElement( "link" ).relList.supports( "preload" );
+		} catch (e) {
+			ret = false;
+		}
+		return function(){
+			return ret;
+		};
+	})();
+
+	// if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+	// then change that media back to its intended value on load
+	rp.bindMediaToggle = function( link ){
+		// remember existing media attr for ultimate state, or default to 'all'
+		var finalMedia = link.media || "all";
+
+		function enableStylesheet(){
+			link.media = finalMedia;
+		}
+
+		// bind load handlers to enable media
+		if( link.addEventListener ){
+			link.addEventListener( "load", enableStylesheet );
+		} else if( link.attachEvent ){
+			link.attachEvent( "onload", enableStylesheet );
+		}
+
+		// Set rel and non-applicable media type to start an async request
+		// note: timeout allows this to happen async to let rendering continue in IE
+		setTimeout(function(){
+			link.rel = "stylesheet";
+			link.media = "only x";
+		});
+		// also enable media after 3 seconds,
+		// which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+		setTimeout( enableStylesheet, 3000 );
+	};
+
+	// loop through link elements in DOM
+	rp.poly = function(){
+		// double check this to prevent external calls from running
+		if( rp.support() ){
+			return;
+		}
+		var links = w.document.getElementsByTagName( "link" );
+		for( var i = 0; i < links.length; i++ ){
+			var link = links[ i ];
+			// qualify links to those with rel=preload and as=style attrs
+			if( link.rel === "preload" && link.getAttribute( "as" ) === "style" && !link.getAttribute( "data-loadcss" ) ){
+				// prevent rerunning on link
+				link.setAttribute( "data-loadcss", true );
+				// bind listeners to toggle media back
+				rp.bindMediaToggle( link );
+			}
+		}
+	};
+
+	// if unsupported, run the polyfill
+	if( !rp.support() ){
+		// run once at least
+		rp.poly();
+
+		// rerun poly on an interval until onload
+		var run = w.setInterval( rp.poly, 500 );
+		if( w.addEventListener ){
+			w.addEventListener( "load", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		} else if( w.attachEvent ){
+			w.attachEvent( "onload", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		}
+	}
+
+
+	// commonjs
+	if( typeof exports !== "undefined" ){
+		exports.loadCSS = loadCSS;
+	}
+	else {
+		w.loadCSS = loadCSS;
+	}
+}( typeof global !== "undefined" ? global : this ) );
+</script>
+
+    <link rel="icon" href="/assets/favicon.ico">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js" as="script">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js" as="script">
+    <link rel="preload" href="/scripts/main.js" as="script">
+    <link rel="preload" as="font" href="/font/Oswald-Regular.ttf" crossorigin>
+    <link rel="preload" as="font" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" crossorigin>
+    
+    <!-- fancybox -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" defer></script>
+    <!-- 百度统计  -->
+    
+    <!-- 谷歌统计  -->
+    
+</head>
+
+    
+        <body class="post-body">
+    
+    
+<header class="header">
+
+    <div class="read-progress"></div>
+    <div class="header-sidebar-menu">&#xe775;</div>
+    <!-- post页的toggle banner  -->
+    
+    <div class="banner">
+            <div class="blog-title">
+                <a href="/" >leisurexi&#39;s Blog.</a>
+            </div>
+            <div class="post-title">
+                <a href="#" class="post-name">Docker 搭建 ELK 集群步骤</a>
+            </div>
+    </div>
+    
+    <a class="home-link" href=/>leisurexi's Blog.</a>
+</header>
+    <div class="wrapper">
+        <div class="site-intro" style="
+
+
+
+
+
+
+
+height:50vh;
+">
+    
+    <!-- 主页  -->
+    
+    
+    <!-- 404页  -->
+            
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(/intro/post-bg.jpg)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+            
+            Docker 搭建 ELK 集群步骤
+            <!-- 404 -->
+            
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            
+            
+            <!-- 404 -->
+            
+        </p>
+        <!-- 文章页meta -->
+        
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                
+                    <div class= post-intro-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "ELK">ELK</a>
+    
+</div>
+                
+                
+                    <div class="post-intro-read">
+                        <span>字数统计: <span class="post-count word-count">4.3k</span>阅读时长: <span class="post-count reading-time">23 min</span></span>
+                    </div>
+                
+                <div class="post-intro-meta">
+                    <span class="post-intro-calander iconfont-archer">&#xe676;</span>
+                    <span class="post-intro-time">2020/04/26</span>
+                    
+                    <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                        <span class="iconfont-archer">&#xe602;</span>
+                        <span id="busuanzi_value_page_pv"></span>
+                    </span>
+                    
+                    <span class="shareWrapper">
+                        <span class="iconfont-archer shareIcon">&#xe71d;</span>
+                        <span class="shareText">Share</span>
+                        <ul class="shareList">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+        
+    </div>
+</div>
+        <script>
+ 
+  // get user agent
+  var browser = {
+    versions: function () {
+      var u = window.navigator.userAgent;
+      return {
+        userAgent: u,
+        trident: u.indexOf('Trident') > -1, //IE内核
+        presto: u.indexOf('Presto') > -1, //opera内核
+        webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+        gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+        mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+        ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+        android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+        iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+        iPad: u.indexOf('iPad') > -1, //是否为iPad
+        webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+        weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+        uc: u.indexOf('UCBrowser') > -1 //是否为android下的UC浏览器
+      };
+    }()
+  }
+  console.log("userAgent:" + browser.versions.userAgent);
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded');
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document.getElementsByClassName('intro-title')[0].classList.add('intro-fade-in');
+      document.getElementsByClassName('intro-subtitle')[0].classList.add('intro-fade-in');
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in');
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb(){
+    if (browser.versions.uc) {
+      console.log("UCBrowser");
+      fontLoaded();
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular']
+        },
+        loading: function () {  //所有字体开始加载
+          // console.log('loading');
+        },
+        active: function () {  //所有字体已渲染
+          fontLoaded();
+        },
+        inactive: function () { //字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout');
+          fontLoaded();
+        },
+        timeout: 5000 // Set the timeout to two seconds
+      });
+    }
+  }
+
+  function asyncErr(){
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (cb) { o.addEventListener('load', function (e) { cb(null, e); }, false); }
+    if (err) { o.addEventListener('error', function (e) { err(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+
+  var asyncLoadWithFallBack = function(arr, success, reject) {
+      var currReject = function(){
+        reject()
+        arr.shift()
+        if(arr.length)
+          async(arr[0], success, currReject)
+        }
+
+      async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack([
+    "https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js", 
+    "https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js",
+    "/lib/webfontloader.min.js"
+  ], asyncCb, asyncErr)
+</script>        
+        <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
+        <div class="container container-unloaded">
+            <main class="main post-page">
+    <article class="article-entry">
+        <p>本篇文章主要介绍在 CentOS 7 上使用 Docker 搭建 ELK。</p>
+<a id="more"></a>
+
+<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>本篇文章主要介绍在两台机器上使用 Docker 搭建 ELK。</p>
+<h1 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h1><h2 id="环境"><a href="#环境" class="headerlink" title="环境"></a>环境</h2><ul>
+<li><p>CentOS 7.7 系统</p>
+</li>
+<li><p>Docker version 19.03.8</p>
+</li>
+<li><p>docker-compose version 1.23.2</p>
+</li>
+</ul>
+<h2 id="系统设置"><a href="#系统设置" class="headerlink" title="系统设置"></a>系统设置</h2><p><code>vim</code> 编辑 <code>/etc/security/limits.conf</code>，在末尾加上：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">* soft nofile 65536</span><br><span class="line">* hard nofile 65536</span><br><span class="line">* soft nproc 4096</span><br><span class="line">* hard nproc 4096</span><br></pre></td></tr></table></figure>
+
+<p><code>vim</code> 编辑 <code>/etc/sysctl.conf</code>，在末尾加上：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vm.max_map_count = 655360</span><br></pre></td></tr></table></figure>
+
+<p>执行 <code>sysctl -p</code> 命令是配置生效。</p>
+<h2 id="Elasticsearch-搭建"><a href="#Elasticsearch-搭建" class="headerlink" title="Elasticsearch 搭建"></a>Elasticsearch 搭建</h2><blockquote>
+<p>注意：如果用非 Docker 搭建，是不能用 <code>root</code> 用户去启动的。</p>
+</blockquote>
+<blockquote>
+<p>由于我是用虚拟机搭建的，我的机器只能开两台，所以只有一个主节点和一个数据节点；在生产环境中最少要3台，防止脑裂问题。</p>
+</blockquote>
+<blockquote>
+<p>注意：如果开启了防火墙，需要执行以下命令开放 9200 和 9300 端口号。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;</span> firewall-cmd --zone=public --add-port=9200/tcp --permanent</span><br><span class="line"><span class="meta">&gt;</span> firewall-cmd --zone=public --add-port=9300/tcp --permanent</span><br><span class="line"><span class="meta">&gt;</span></span><br></pre></td></tr></table></figure>
+</blockquote>
+<h3 id="主节点"><a href="#主节点" class="headerlink" title="主节点"></a>主节点</h3><p>首先设置主节点的配置文件 <code>elasticsearch.yml</code>，如下：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ======================== Elasticsearch Configuration =========================</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># <span class="doctag">NOTE:</span> Elasticsearch comes with reasonable defaults for most settings.</span></span><br><span class="line"><span class="comment">#       Before you set out to tweak and tune the configuration, make sure you</span></span><br><span class="line"><span class="comment">#       understand what are you trying to accomplish and the consequences.</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># The primary way of configuring a node is via this file. This template lists</span></span><br><span class="line"><span class="comment"># the most important settings you may want to configure for a production cluster.</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Please consult the documentation for further information on configuration options:</span></span><br><span class="line"><span class="comment"># https://www.elastic.co/guide/en/elasticsearch/reference/index.html</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># ---------------------------------- Cluster -----------------------------------</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Use a descriptive name for your cluster:</span></span><br><span class="line"></span><br><span class="line"><span class="string">cluster.name:</span> <span class="string">es-cluster</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># ------------------------------------ Node ------------------------------------</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Use a descriptive name for the node:</span></span><br><span class="line"></span><br><span class="line"><span class="string">node.name:</span> <span class="string">es-master</span></span><br><span class="line"></span><br><span class="line"><span class="string">node.master:</span> <span class="literal">true</span></span><br><span class="line"></span><br><span class="line"><span class="string">node.data:</span> <span class="literal">false</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#node.ingest: false</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#node.ml: false</span></span><br><span class="line"><span class="comment">#xpack.ml.enabled: true</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#cluster.remote.connect: false</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Add custom attributes to the node:</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment">#node.attr.rack: r1</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># ----------------------------------- Paths ------------------------------------</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Path to directory where to store the data (separate multiple locations by comma):</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment">#path.data: /path/to/data</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Path to log files:</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment">#path.logs: /path/to/logs</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># ----------------------------------- Memory -----------------------------------</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Lock the memory on startup:</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment">#bootstrap.memory_lock: true</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Make sure that the heap size is set to about half the memory available</span></span><br><span class="line"><span class="comment"># on the system and that the owner of the process is allowed to use this</span></span><br><span class="line"><span class="comment"># limit.</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Elasticsearch performs poorly when the system is swapping the memory.</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># ---------------------------------- Network -----------------------------------</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Set the bind address to a specific IP (IPv4 or IPv6):</span></span><br><span class="line"></span><br><span class="line"><span class="string">network.host:</span> <span class="number">0.0</span><span class="number">.0</span><span class="number">.0</span></span><br><span class="line"><span class="string">network.publish_host:</span> <span class="number">192.168</span><span class="number">.239</span><span class="number">.133</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Set a custom port for HTTP:</span></span><br><span class="line"></span><br><span class="line"><span class="string">http.port:</span> <span class="number">9200</span></span><br><span class="line"></span><br><span class="line"><span class="string">transport.tcp.port:</span> <span class="number">9300</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># For more information, consult the network module documentation.</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># --------------------------------- Discovery ----------------------------------</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Pass an initial list of hosts to perform discovery when this node is started:</span></span><br><span class="line"><span class="comment"># The default list of hosts is ["127.0.0.1", "[::1]"]</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="string">discovery.seed_hosts:</span></span><br><span class="line"><span class="bullet">  -</span> <span class="number">192.168</span><span class="number">.239</span><span class="number">.133</span></span><br><span class="line"><span class="bullet">  -</span> <span class="number">192.168</span><span class="number">.239</span><span class="number">.131</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Bootstrap the cluster using an initial set of master-eligible nodes:</span></span><br><span class="line"></span><br><span class="line"><span class="string">cluster.initial_master_nodes:</span></span><br><span class="line"><span class="bullet">  -</span> <span class="string">es-master</span></span><br><span class="line"><span class="comment">#  - es-node2</span></span><br><span class="line"><span class="comment">#  - es-node3</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># For more information, consult the discovery and cluster formation module documentation.</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># ---------------------------------- Gateway -----------------------------------</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Block initial recovery after a full cluster restart until N nodes are started:</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment">#gateway.recover_after_nodes: 2</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># For more information, consult the gateway module documentation.</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># ---------------------------------- Various -----------------------------------</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Require explicit names when deleting indices:</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment">#action.destructive_requires_name: true</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="string">http.cors.enabled:</span> <span class="literal">true</span></span><br><span class="line"><span class="string">http.cors.allow-origin:</span> <span class="string">"*"</span></span><br></pre></td></tr></table></figure>
+
+<p>然后编写主节点的 <code>docker-compose.yml</code>，如下：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">version:</span> <span class="string">"3"</span></span><br><span class="line"><span class="attr">services:</span></span><br><span class="line"><span class="attr">  es-master:</span></span><br><span class="line"><span class="attr">    container_name:</span> <span class="string">es-master</span></span><br><span class="line"><span class="attr">    hostname:</span> <span class="string">es-master</span></span><br><span class="line"><span class="attr">    image:</span> <span class="string">leisurexi/elasticsearch:7.1.0</span></span><br><span class="line"><span class="attr">    privileged:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">    ports:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="number">9200</span><span class="string">:9200</span></span><br><span class="line"><span class="bullet">      -</span> <span class="number">9300</span><span class="string">:9300</span></span><br><span class="line"><span class="attr">    volumes:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">./elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">./data:/usr/share/elasticsearch/data</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">./logs:/usr/share/elasticsearch/logs</span></span><br><span class="line"><span class="attr">    environment:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">"ES_JAVA_OPTS=-Xms2g -Xmx2g"</span></span><br><span class="line"><span class="attr">    ulimits:</span></span><br><span class="line"><span class="attr">      memlock:</span></span><br><span class="line"><span class="attr">        soft:</span> <span class="bullet">-1</span></span><br><span class="line"><span class="attr">        hard:</span> <span class="bullet">-1</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>注意：这个镜像是我自己 Docker Hup 上的，你可以换成官方的。（我的镜像和官方的一样，只是嫌每次下载太难，就把官方的镜像改了 <code>tag</code> 上传到自己的 Docker Hup 上了）</p>
+</blockquote>
+<p>接着执行以下命令启动容器</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker-compose up -d</span><br></pre></td></tr></table></figure>
+
+<p>如果出现下图所示的错误，可以使用 <code>chmod 777 logs</code> 和 <code>chmod 777 data</code> 来修改文件夹的权限，即可正常启动。</p>
+<p><img src="http://ww1.sinaimg.cn/large/006Vpl27ly1ge66se2rosj30tc06adgb.jpg" alt></p>
+<p>然后进入容器，创建默认的用户和分组</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span> 进入容器</span><br><span class="line">docker exec -it es-master bash</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span> 激活默认用户并设置密码</span><br><span class="line">bin/elasticsearch-setup-passwords interactive</span><br></pre></td></tr></table></figure>
+
+<h3 id="数据节点"><a href="#数据节点" class="headerlink" title="数据节点"></a>数据节点</h3><p>首先设置数据节点的配置文件 <code>elasticsearch.yml</code>，如下：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ======================== Elasticsearch Configuration =========================</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># <span class="doctag">NOTE:</span> Elasticsearch comes with reasonable defaults for most settings.</span></span><br><span class="line"><span class="comment">#       Before you set out to tweak and tune the configuration, make sure you</span></span><br><span class="line"><span class="comment">#       understand what are you trying to accomplish and the consequences.</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># The primary way of configuring a node is via this file. This template lists</span></span><br><span class="line"><span class="comment"># the most important settings you may want to configure for a production cluster.</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Please consult the documentation for further information on configuration options:</span></span><br><span class="line"><span class="comment"># https://www.elastic.co/guide/en/elasticsearch/reference/index.html</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># ---------------------------------- Cluster -----------------------------------</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Use a descriptive name for your cluster:</span></span><br><span class="line"></span><br><span class="line"><span class="string">cluster.name:</span> <span class="string">es-cluster</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># ------------------------------------ Node ------------------------------------</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Use a descriptive name for the node:</span></span><br><span class="line"></span><br><span class="line"><span class="string">node.name:</span> <span class="string">es-data</span></span><br><span class="line"></span><br><span class="line"><span class="string">node.master:</span> <span class="literal">true</span></span><br><span class="line"></span><br><span class="line"><span class="string">node.data:</span> <span class="literal">true</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#node.ingest: false</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#node.ml: false</span></span><br><span class="line"><span class="comment">#xpack.ml.enabled: true</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#cluster.remote.connect: false</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Add custom attributes to the node:</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment">#node.attr.rack: r1</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># ----------------------------------- Paths ------------------------------------</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Path to directory where to store the data (separate multiple locations by comma):</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment">#path.data: /path/to/data</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Path to log files:</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment">#path.logs: /path/to/logs</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># ----------------------------------- Memory -----------------------------------</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Lock the memory on startup:</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment">#bootstrap.memory_lock: true</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Make sure that the heap size is set to about half the memory available</span></span><br><span class="line"><span class="comment"># on the system and that the owner of the process is allowed to use this</span></span><br><span class="line"><span class="comment"># limit.</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Elasticsearch performs poorly when the system is swapping the memory.</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># ---------------------------------- Network -----------------------------------</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Set the bind address to a specific IP (IPv4 or IPv6):</span></span><br><span class="line"></span><br><span class="line"><span class="string">network.host:</span> <span class="number">0.0</span><span class="number">.0</span><span class="number">.0</span></span><br><span class="line"><span class="string">network.publish_host:</span> <span class="number">192.168</span><span class="number">.239</span><span class="number">.131</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Set a custom port for HTTP:</span></span><br><span class="line"></span><br><span class="line"><span class="string">http.port:</span> <span class="number">9200</span></span><br><span class="line"></span><br><span class="line"><span class="string">transport.tcp.port:</span> <span class="number">9300</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># For more information, consult the network module documentation.</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># --------------------------------- Discovery ----------------------------------</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Pass an initial list of hosts to perform discovery when this node is started:</span></span><br><span class="line"><span class="comment"># The default list of hosts is ["127.0.0.1", "[::1]"]</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="string">discovery.seed_hosts:</span></span><br><span class="line"><span class="bullet">  -</span> <span class="number">192.168</span><span class="number">.239</span><span class="number">.133</span></span><br><span class="line"><span class="bullet">  -</span> <span class="number">192.168</span><span class="number">.239</span><span class="number">.131</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Bootstrap the cluster using an initial set of master-eligible nodes:</span></span><br><span class="line"></span><br><span class="line"><span class="string">cluster.initial_master_nodes:</span></span><br><span class="line"><span class="bullet">  -</span> <span class="string">es-master</span></span><br><span class="line"><span class="comment">#  - es-node2</span></span><br><span class="line"><span class="comment">#  - es-node3</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># For more information, consult the discovery and cluster formation module documentation.</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># ---------------------------------- Gateway -----------------------------------</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Block initial recovery after a full cluster restart until N nodes are started:</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment">#gateway.recover_after_nodes: 2</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># For more information, consult the gateway module documentation.</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># ---------------------------------- Various -----------------------------------</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Require explicit names when deleting indices:</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment">#action.destructive_requires_name: true</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="string">http.cors.enabled:</span> <span class="literal">true</span></span><br><span class="line"><span class="string">http.cors.allow-origin:</span> <span class="string">"*"</span></span><br></pre></td></tr></table></figure>
+
+<p>然后编写数据节点的 <code>docker-compose.yml</code>，如下：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">version:</span> <span class="string">"3"</span></span><br><span class="line"><span class="attr">services:</span></span><br><span class="line"><span class="attr">  es-master:</span></span><br><span class="line"><span class="attr">    container_name:</span> <span class="string">es-data</span></span><br><span class="line"><span class="attr">    hostname:</span> <span class="string">es-data</span></span><br><span class="line"><span class="attr">    image:</span> <span class="string">leisurexi/elasticsearch:7.1.0</span></span><br><span class="line"><span class="attr">    privileged:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">    ports:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="number">9200</span><span class="string">:9200</span></span><br><span class="line"><span class="bullet">      -</span> <span class="number">9300</span><span class="string">:9300</span></span><br><span class="line"><span class="attr">    volumes:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">./elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">./data:/usr/share/elasticsearch/data</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">./logs:/usr/share/elasticsearch/logs</span></span><br><span class="line"><span class="attr">    environment:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">"ES_JAVA_OPTS=-Xms2g -Xmx2g"</span></span><br><span class="line"><span class="attr">    ulimits:</span></span><br><span class="line"><span class="attr">      memlock:</span></span><br><span class="line"><span class="attr">        soft:</span> <span class="bullet">-1</span></span><br><span class="line"><span class="attr">        hard:</span> <span class="bullet">-1</span></span><br></pre></td></tr></table></figure>
+
+<p>接着像上面主节点一样启动就行了，然后访问主节点的 <code>http://192.168.239.133:9200/_cat/nodes</code> API 地址，如下图所示就代表 Elasticsearch 集群搭建成功了。</p>
+<p><img src="http://ww1.sinaimg.cn/large/006Vpl27ly1ge6at2a8asj30c001xweb.jpg" alt></p>
+<h2 id="Kibana-搭建"><a href="#Kibana-搭建" class="headerlink" title="Kibana 搭建"></a>Kibana 搭建</h2><blockquote>
+<p>因为主节点负责集群范围内的轻量级操作，例如创建或删除索引，跟踪哪些节点是集群的一部分以及确定将哪些碎片分配给哪些节点；所以将 Kibana 跟主节点放在一台机器上。</p>
+</blockquote>
+<blockquote>
+<p>注意：如果开启了防火墙，需要执行以下命令开放 5601 端口号。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;</span> firewall-cmd --zone=public --add-port=5601/tcp --permanent</span><br><span class="line"><span class="meta">&gt;</span></span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>首先是 Kibana 的配置文件 <code>Kibana.yml</code>，如下：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Kibana is served by a back end server. This setting specifies the port to use.</span></span><br><span class="line"><span class="string">server.port:</span> <span class="number">5601</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Specifies the address to which the Kibana server will bind. IP addresses and host names are both valid values.</span></span><br><span class="line"><span class="comment"># The default is 'localhost', which usually means remote machines will not be able to connect.</span></span><br><span class="line"><span class="comment"># To allow connections from remote users, set this parameter to a non-loopback address.</span></span><br><span class="line"><span class="string">server.host:</span> <span class="string">"0.0.0.0"</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Enables you to specify a path to mount Kibana at if you are running behind a proxy.</span></span><br><span class="line"><span class="comment"># Use the `server.rewriteBasePath` setting to tell Kibana if it should remove the basePath</span></span><br><span class="line"><span class="comment"># from requests it receives, and to prevent a deprecation warning at startup.</span></span><br><span class="line"><span class="comment"># This setting cannot end in a slash.</span></span><br><span class="line"><span class="comment">#server.basePath: ""</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Specifies whether Kibana should rewrite requests that are prefixed with</span></span><br><span class="line"><span class="comment"># `server.basePath` or require that they are rewritten by your reverse proxy.</span></span><br><span class="line"><span class="comment"># This setting was effectively always `false` before Kibana 6.3 and will</span></span><br><span class="line"><span class="comment"># default to `true` starting in Kibana 7.0.</span></span><br><span class="line"><span class="comment">#server.rewriteBasePath: false</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># The maximum payload size in bytes for incoming server requests.</span></span><br><span class="line"><span class="comment">#server.maxPayloadBytes: 1048576</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># The Kibana server's name.  This is used for display purposes.</span></span><br><span class="line"><span class="comment">#server.name: "your-hostname"</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># The URLs of the Elasticsearch instances to use for all your queries.</span></span><br><span class="line"><span class="string">elasticsearch.hosts:</span> <span class="string">["http://192.168.239.133:9200",</span> <span class="string">"http://192.168.239.131:9200"</span><span class="string">]</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># When this setting's value is true Kibana uses the hostname specified in the server.host</span></span><br><span class="line"><span class="comment"># setting. When the value of this setting is false, Kibana uses the hostname of the host</span></span><br><span class="line"><span class="comment"># that connects to this Kibana instance.</span></span><br><span class="line"><span class="comment">#elasticsearch.preserveHost: true</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Kibana uses an index in Elasticsearch to store saved searches, visualizations and</span></span><br><span class="line"><span class="comment"># dashboards. Kibana creates a new index if the index doesn't already exist.</span></span><br><span class="line"><span class="comment">#kibana.index: ".kibana"</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># The default application to load.</span></span><br><span class="line"><span class="comment">#kibana.defaultAppId: "home"</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># If your Elasticsearch is protected with basic authentication, these settings provide</span></span><br><span class="line"><span class="comment"># the username and password that the Kibana server uses to perform maintenance on the Kibana</span></span><br><span class="line"><span class="comment"># index at startup. Your Kibana users still need to authenticate with Elasticsearch, which</span></span><br><span class="line"><span class="comment"># is proxied through the Kibana server.</span></span><br><span class="line"><span class="comment">#elasticsearch.username: "user"</span></span><br><span class="line"><span class="comment">#elasticsearch.password: "pass"</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Enables SSL and paths to the PEM-format SSL certificate and SSL key files, respectively.</span></span><br><span class="line"><span class="comment"># These settings enable SSL for outgoing requests from the Kibana server to the browser.</span></span><br><span class="line"><span class="comment">#server.ssl.enabled: false</span></span><br><span class="line"><span class="comment">#server.ssl.certificate: /path/to/your/server.crt</span></span><br><span class="line"><span class="comment">#server.ssl.key: /path/to/your/server.key</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Optional settings that provide the paths to the PEM-format SSL certificate and key files.</span></span><br><span class="line"><span class="comment"># These files validate that your Elasticsearch backend uses the same key files.</span></span><br><span class="line"><span class="comment">#elasticsearch.ssl.certificate: /path/to/your/client.crt</span></span><br><span class="line"><span class="comment">#elasticsearch.ssl.key: /path/to/your/client.key</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Optional setting that enables you to specify a path to the PEM file for the certificate</span></span><br><span class="line"><span class="comment"># authority for your Elasticsearch instance.</span></span><br><span class="line"><span class="comment">#elasticsearch.ssl.certificateAuthorities: [ "/path/to/your/CA.pem" ]</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># To disregard the validity of SSL certificates, change this setting's value to 'none'.</span></span><br><span class="line"><span class="comment">#elasticsearch.ssl.verificationMode: full</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Time in milliseconds to wait for Elasticsearch to respond to pings. Defaults to the value of</span></span><br><span class="line"><span class="comment"># the elasticsearch.requestTimeout setting.</span></span><br><span class="line"><span class="comment">#elasticsearch.pingTimeout: 1500</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Time in milliseconds to wait for responses from the back end or Elasticsearch. This value</span></span><br><span class="line"><span class="comment"># must be a positive integer.</span></span><br><span class="line"><span class="comment">#elasticsearch.requestTimeout: 30000</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># List of Kibana client-side headers to send to Elasticsearch. To send *no* client-side</span></span><br><span class="line"><span class="comment"># headers, set this value to [] (an empty list).</span></span><br><span class="line"><span class="comment">#elasticsearch.requestHeadersWhitelist: [ authorization ]</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Header names and values that are sent to Elasticsearch. Any custom headers cannot be overwritten</span></span><br><span class="line"><span class="comment"># by client-side headers, regardless of the elasticsearch.requestHeadersWhitelist configuration.</span></span><br><span class="line"><span class="comment">#elasticsearch.customHeaders: &#123;&#125;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Time in milliseconds for Elasticsearch to wait for responses from shards. Set to 0 to disable.</span></span><br><span class="line"><span class="comment">#elasticsearch.shardTimeout: 30000</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Time in milliseconds to wait for Elasticsearch at Kibana startup before retrying.</span></span><br><span class="line"><span class="comment">#elasticsearch.startupTimeout: 5000</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Logs queries sent to Elasticsearch. Requires logging.verbose set to true.</span></span><br><span class="line"><span class="comment">#elasticsearch.logQueries: false</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Specifies the path where Kibana creates the process ID file.</span></span><br><span class="line"><span class="comment">#pid.file: /var/run/kibana.pid</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Enables you specify a file where Kibana stores log output.</span></span><br><span class="line"><span class="comment">#logging.dest: stdout</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Set the value of this setting to true to suppress all logging output.</span></span><br><span class="line"><span class="comment">#logging.silent: false</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Set the value of this setting to true to suppress all logging output other than error messages.</span></span><br><span class="line"><span class="comment">#logging.quiet: false</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Set the value of this setting to true to log all events, including system usage information</span></span><br><span class="line"><span class="comment"># and all requests.</span></span><br><span class="line"><span class="comment">#logging.verbose: false</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Set the interval in milliseconds to sample system and process performance</span></span><br><span class="line"><span class="comment"># metrics. Minimum is 100ms. Defaults to 5000.</span></span><br><span class="line"><span class="comment">#ops.interval: 5000</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Specifies locale to be used for all localizable strings, dates and number formats.</span></span><br><span class="line"><span class="string">i18n.locale:</span> <span class="string">"zh-CN"</span></span><br></pre></td></tr></table></figure>
+
+<p>然后是 <code>docker-compose.yml</code> 文件的编写，如下：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">version:</span> <span class="string">"3"</span></span><br><span class="line"><span class="attr">services:</span></span><br><span class="line"><span class="attr">  kibana:</span></span><br><span class="line"><span class="attr">    container_name:</span> <span class="string">kibana</span></span><br><span class="line"><span class="attr">    hostname:</span> <span class="string">kibana</span></span><br><span class="line"><span class="attr">    image:</span> <span class="string">leisurexi/kibana:7.1.0</span></span><br><span class="line"><span class="attr">    ports:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="number">5601</span><span class="string">:5601</span></span><br><span class="line"><span class="attr">    volumes:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">./kibana.yml:/usr/share/kibana/config/kibana.yml</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>注意：这个镜像是我自己 Docker Hup 上的，你可以换成官方的。</p>
+</blockquote>
+<p>接着像 Elasticsearch 几点一样启动就可以了。</p>
+<p>我们访问 Kibana 节点的 5601 端口就可以看到界面了，接下来执行 <code>GET _cluster/health</code> 查看 ES 集群的健康状况，来验证 Kibana 是否可以正常工作。</p>
+<p><img src="http://ww1.sinaimg.cn/large/006Vpl27ly1ge6bemwkihj30sq0ekt9s.jpg" alt></p>
+<p>如上图一样就代表你已经 kibana 已经搭建成功了。</p>
+<h2 id="logstash-搭建"><a href="#logstash-搭建" class="headerlink" title="logstash 搭建"></a>logstash 搭建</h2><blockquote>
+<p>logstash 在 ES 的数据节点上搭建。</p>
+</blockquote>
+<blockquote>
+<p>注意：如果开启了防火墙，需要执行以下命令开放 4560 和 5044 端口号。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;</span> firewall-cmd --zone=public --add-port=4560/tcp --permanent</span><br><span class="line"><span class="meta">&gt;</span> firewall-cmd --zone=public --add-port=5044/tcp --permanent</span><br><span class="line"><span class="meta">&gt;</span></span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>首先是 logstash 的全局配置文件 <code>logstash.yml</code>，如下：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Settings file in YAML</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Settings can be specified either in hierarchical form, e.g.:</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment">#   pipeline:</span></span><br><span class="line"><span class="comment">#     batch:</span></span><br><span class="line"><span class="comment">#       size: 125</span></span><br><span class="line"><span class="comment">#       delay: 5</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Or as flat keys:</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment">#   pipeline.batch.size: 125</span></span><br><span class="line"><span class="comment">#   pipeline.batch.delay: 5</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># ------------  Node identity ------------</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Use a descriptive name for the node:</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># node.name: test</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># If omitted the node name will default to the machine's host name</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># ------------ Data path ------------------</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Which directory should be used by logstash and its plugins</span></span><br><span class="line"><span class="comment"># for any persistent needs. Defaults to LOGSTASH_HOME/data</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># path.data:</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># ------------ Pipeline Settings --------------</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># The ID of the pipeline.</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># pipeline.id: main</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Set the number of workers that will, in parallel, execute the filters+outputs</span></span><br><span class="line"><span class="comment"># stage of the pipeline.</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># This defaults to the number of the host's CPU cores.</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># pipeline.workers: 2</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># How many events to retrieve from inputs before sending to filters+workers</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># pipeline.batch.size: 125</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># How long to wait in milliseconds while polling for the next event</span></span><br><span class="line"><span class="comment"># before dispatching an undersized batch to filters+outputs</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># pipeline.batch.delay: 50</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Force Logstash to exit during shutdown even if there are still inflight</span></span><br><span class="line"><span class="comment"># events in memory. By default, logstash will refuse to quit until all</span></span><br><span class="line"><span class="comment"># received events have been pushed to the outputs.</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># WARNING: enabling this can lead to data loss during shutdown</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># pipeline.unsafe_shutdown: false</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># ------------ Pipeline Configuration Settings --------------</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Where to fetch the pipeline configuration for the main pipeline</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># path.config:</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Pipeline configuration string for the main pipeline</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># config.string:</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># At startup, test if the configuration is valid and exit (dry run)</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># config.test_and_exit: false</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Periodically check if the configuration has changed and reload the pipeline</span></span><br><span class="line"><span class="comment"># This can also be triggered manually through the SIGHUP signal</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># config.reload.automatic: false</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># How often to check if the pipeline configuration has changed (in seconds)</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># config.reload.interval: 3s</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Show fully compiled configuration as debug log message</span></span><br><span class="line"><span class="comment"># <span class="doctag">NOTE:</span> --log.level must be 'debug'</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># config.de<span class="doctag">bug:</span> false</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># When enabled, process escaped characters such as \n and \" in strings in the</span></span><br><span class="line"><span class="comment"># pipeline configuration files.</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># config.support_escapes: false</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># ------------ Module Settings ---------------</span></span><br><span class="line"><span class="comment"># Define modules here.  Modules definitions must be defined as an array.</span></span><br><span class="line"><span class="comment"># The simple way to see this is to prepend each `name` with a `-`, and keep</span></span><br><span class="line"><span class="comment"># all associated variables under the `name` they are associated with, and</span></span><br><span class="line"><span class="comment"># above the next, like this:</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># modules:</span></span><br><span class="line"><span class="comment">#   - name: MODULE_NAME</span></span><br><span class="line"><span class="comment">#     var.PLUGINTYPE1.PLUGINNAME1.KEY1: VALUE</span></span><br><span class="line"><span class="comment">#     var.PLUGINTYPE1.PLUGINNAME1.KEY2: VALUE</span></span><br><span class="line"><span class="comment">#     var.PLUGINTYPE2.PLUGINNAME1.KEY1: VALUE</span></span><br><span class="line"><span class="comment">#     var.PLUGINTYPE3.PLUGINNAME3.KEY1: VALUE</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Module variable names must be in the format of</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># var.PLUGIN_TYPE.PLUGIN_NAME.KEY</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># modules:</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># ------------ Cloud Settings ---------------</span></span><br><span class="line"><span class="comment"># Define Elastic Cloud settings here.</span></span><br><span class="line"><span class="comment"># Format of cloud.id is a base64 value e.g. dXMtZWFzdC0xLmF3cy5mb3VuZC5pbyRub3RhcmVhbCRpZGVudGlmaWVy</span></span><br><span class="line"><span class="comment"># and it may have an label prefix e.g. staging:dXMtZ...</span></span><br><span class="line"><span class="comment"># This will overwrite 'var.elasticsearch.hosts' and 'var.kibana.host'</span></span><br><span class="line"><span class="comment"># cloud.id: &lt;identifier&gt;</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Format of cloud.auth is: &lt;user&gt;:&lt;pass&gt;</span></span><br><span class="line"><span class="comment"># This is optional</span></span><br><span class="line"><span class="comment"># If supplied this will overwrite 'var.elasticsearch.username' and 'var.elasticsearch.password'</span></span><br><span class="line"><span class="comment"># If supplied this will overwrite 'var.kibana.username' and 'var.kibana.password'</span></span><br><span class="line"><span class="comment"># cloud.auth: elastic:&lt;password&gt;</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># ------------ Queuing Settings --------------</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Internal queuing model, "memory" for legacy in-memory based queuing and</span></span><br><span class="line"><span class="comment"># "persisted" for disk-based acked queueing. Defaults is memory</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># queue.type: memory</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># If using queue.type: persisted, the directory path where the data files will be stored.</span></span><br><span class="line"><span class="comment"># Default is path.data/queue</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># path.queue:</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># If using queue.type: persisted, the page data files size. The queue data consists of</span></span><br><span class="line"><span class="comment"># append-only data files separated into pages. Default is 64mb</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># queue.page_capacity: 64mb</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># If using queue.type: persisted, the maximum number of unread events in the queue.</span></span><br><span class="line"><span class="comment"># Default is 0 (unlimited)</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># queue.max_events: 0</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># If using queue.type: persisted, the total capacity of the queue in number of bytes.</span></span><br><span class="line"><span class="comment"># If you would like more unacked events to be buffered in Logstash, you can increase the</span></span><br><span class="line"><span class="comment"># capacity using this setting. Please make sure your disk drive has capacity greater than</span></span><br><span class="line"><span class="comment"># the size specified here. If both max_bytes and max_events are specified, Logstash will pick</span></span><br><span class="line"><span class="comment"># whichever criteria is reached first</span></span><br><span class="line"><span class="comment"># Default is 1024mb or 1gb</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># queue.max_bytes: 1024mb</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># If using queue.type: persisted, the maximum number of acked events before forcing a checkpoint</span></span><br><span class="line"><span class="comment"># Default is 1024, 0 for unlimited</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># queue.checkpoint.acks: 1024</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># If using queue.type: persisted, the maximum number of written events before forcing a checkpoint</span></span><br><span class="line"><span class="comment"># Default is 1024, 0 for unlimited</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># queue.checkpoint.writes: 1024</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># If using queue.type: persisted, the interval in milliseconds when a checkpoint is forced on the head page</span></span><br><span class="line"><span class="comment"># Default is 1000, 0 for no periodic checkpoint.</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># queue.checkpoint.interval: 1000</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># ------------ Dead-Letter Queue Settings --------------</span></span><br><span class="line"><span class="comment"># Flag to turn on dead-letter queue.</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># dead_letter_queue.enable: false</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># If using dead_letter_queue.enable: true, the maximum size of each dead letter queue. Entries</span></span><br><span class="line"><span class="comment"># will be dropped if they would increase the size of the dead letter queue beyond this setting.</span></span><br><span class="line"><span class="comment"># Default is 1024mb</span></span><br><span class="line"><span class="comment"># dead_letter_queue.max_bytes: 1024mb</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># If using dead_letter_queue.enable: true, the directory path where the data files will be stored.</span></span><br><span class="line"><span class="comment"># Default is path.data/dead_letter_queue</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># path.dead_letter_queue:</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># ------------ Metrics Settings --------------</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Bind address for the metrics REST endpoint</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># http.host: "127.0.0.1"</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Bind port for the metrics REST endpoint, this option also accept a range</span></span><br><span class="line"><span class="comment"># (9600-9700) and logstash will pick up the first available ports.</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># http.port: 9600-9700</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># ------------ Debugging Settings --------------</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Options for log.level:</span></span><br><span class="line"><span class="comment">#   * fatal</span></span><br><span class="line"><span class="comment">#   * error</span></span><br><span class="line"><span class="comment">#   * warn</span></span><br><span class="line"><span class="comment">#   * info (default)</span></span><br><span class="line"><span class="comment">#   * debug</span></span><br><span class="line"><span class="comment">#   * trace</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># log.level: info</span></span><br><span class="line"><span class="comment"># path.logs:</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># ------------ Other Settings --------------</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Where to find custom plugins</span></span><br><span class="line"><span class="comment"># path.plugins: []</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># ------------ X-Pack Settings (not applicable for OSS build)--------------</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># X-Pack Monitoring</span></span><br><span class="line"><span class="comment"># https://www.elastic.co/guide/en/logstash/current/monitoring-logstash.html</span></span><br><span class="line"><span class="string">xpack.monitoring.enabled:</span> <span class="literal">true</span></span><br><span class="line"><span class="comment">#xpack.monitoring.elasticsearch.username: logstash_system</span></span><br><span class="line"><span class="comment">#xpack.monitoring.elasticsearch.password: password</span></span><br><span class="line"><span class="string">xpack.monitoring.elasticsearch.hosts:</span> <span class="string">["http://192.168.239.133:9200",</span> <span class="string">"http://192.168.239.131:9200"</span><span class="string">]</span></span><br><span class="line"><span class="comment">#xpack.monitoring.elasticsearch.ssl.certificate_authority: [ "/path/to/ca.crt" ]</span></span><br><span class="line"><span class="comment">#xpack.monitoring.elasticsearch.ssl.truststore.path: path/to/file</span></span><br><span class="line"><span class="comment">#xpack.monitoring.elasticsearch.ssl.truststore.password: password</span></span><br><span class="line"><span class="comment">#xpack.monitoring.elasticsearch.ssl.keystore.path: /path/to/file</span></span><br><span class="line"><span class="comment">#xpack.monitoring.elasticsearch.ssl.keystore.password: password</span></span><br><span class="line"><span class="comment">#xpack.monitoring.elasticsearch.ssl.verification_mode: certificate</span></span><br><span class="line"><span class="comment">#xpack.monitoring.elasticsearch.sniffing: false</span></span><br><span class="line"><span class="comment">#xpack.monitoring.collection.interval: 10s</span></span><br><span class="line"><span class="comment">#xpack.monitoring.collection.pipeline.details.enabled: true</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># X-Pack Management</span></span><br><span class="line"><span class="comment"># https://www.elastic.co/guide/en/logstash/current/logstash-centralized-pipeline-management.html</span></span><br><span class="line"><span class="string">xpack.management.enabled:</span> <span class="literal">false</span></span><br><span class="line"><span class="comment">#xpack.management.pipeline.id: ["main", "apache_logs"]</span></span><br><span class="line"><span class="comment">#xpack.management.elasticsearch.username: logstash_admin_user</span></span><br><span class="line"><span class="comment">#xpack.management.elasticsearch.password: password</span></span><br><span class="line"><span class="comment">#xpack.management.elasticsearch.hosts: ["https://es1:9200", "https://es2:9200"]</span></span><br><span class="line"><span class="comment">#xpack.management.elasticsearch.ssl.certificate_authority: [ "/path/to/ca.crt" ]</span></span><br><span class="line"><span class="comment">#xpack.management.elasticsearch.ssl.truststore.path: /path/to/file</span></span><br><span class="line"><span class="comment">#xpack.management.elasticsearch.ssl.truststore.password: password</span></span><br><span class="line"><span class="comment">#xpack.management.elasticsearch.ssl.keystore.path: /path/to/file</span></span><br><span class="line"><span class="comment">#xpack.management.elasticsearch.ssl.keystore.password: password</span></span><br><span class="line"><span class="comment">#xpack.management.elasticsearch.ssl.verification_mode: certificate</span></span><br><span class="line"><span class="comment">#xpack.management.elasticsearch.sniffing: false</span></span><br><span class="line"><span class="comment">#xpack.management.logstash.poll_interval: 5s</span></span><br></pre></td></tr></table></figure>
+
+<p>然后是自定义的 logstash 的配置文件 <code>logstash.conf</code>，如下：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">input</span> <span class="string">&#123;</span></span><br><span class="line">  <span class="string">tcp</span> <span class="string">&#123;</span></span><br><span class="line">    <span class="string">mode</span> <span class="string">=&gt;</span> <span class="string">"server"</span></span><br><span class="line">    <span class="string">host</span> <span class="string">=&gt;</span> <span class="string">"0.0.0.0"</span></span><br><span class="line">    <span class="string">port</span> <span class="string">=&gt;</span> <span class="number">4560</span></span><br><span class="line">    <span class="string">codec</span> <span class="string">=&gt;</span> <span class="string">json_lines</span></span><br><span class="line">  <span class="string">&#125;</span></span><br><span class="line"><span class="string">&#125;</span></span><br><span class="line"><span class="string">output</span> <span class="string">&#123;</span></span><br><span class="line">  <span class="string">elasticsearch</span> <span class="string">&#123;</span></span><br><span class="line">    <span class="string">hosts</span> <span class="string">=&gt;</span> <span class="string">"http://192.168.239.133:9200"</span></span><br><span class="line">    <span class="string">index</span> <span class="string">=&gt;</span> <span class="string">"log-<span class="template-variable">%&#123;+YYYY.MM.dd&#125;</span>"</span></span><br><span class="line">  <span class="string">&#125;</span></span><br><span class="line"><span class="string">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>上面文件的大概意思就是监听 4560 端口，然后写入 ES，索引名称就是 log 前缀加上日期；每天都会创建一个新的索引。 </p>
+</blockquote>
+<p>然后是 <code>docker-compose.yml</code>，如下：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">version:</span> <span class="string">"3"</span></span><br><span class="line"><span class="attr">services:</span></span><br><span class="line"><span class="attr">  logstash:</span></span><br><span class="line"><span class="attr">    container_name:</span> <span class="string">logstash</span></span><br><span class="line"><span class="attr">    hostname:</span> <span class="string">logstash</span></span><br><span class="line"><span class="attr">    image:</span> <span class="string">leisurexi/logstash:7.1.0</span></span><br><span class="line"><span class="attr">    command:</span> <span class="string">logstash</span> <span class="bullet">-f</span> <span class="string">./config/logstash.conf</span></span><br><span class="line"><span class="attr">    volumes:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">./logstash.conf:/usr/share/logstash/config/logstash.conf</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">./logstash.yml:/usr/share/logstash/config/logstash.yml</span></span><br><span class="line"><span class="attr">    environment:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">elasticsearch.hosts=http://192.168.239.133:9200</span></span><br><span class="line"><span class="attr">    ports:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="number">4560</span><span class="string">:4560</span></span><br><span class="line"><span class="bullet">      -</span> <span class="number">5044</span><span class="string">:5044</span></span><br></pre></td></tr></table></figure>
+
+<p>最后像上面启动 ES 一样，启动 logstash 即可。</p>
+<h2 id="定期删除索引"><a href="#定期删除索引" class="headerlink" title="定期删除索引"></a>定期删除索引</h2><p>如果长时间运行，会有磁盘满的而无法写入 ES 的情况，所以得定时删除不怎么重要的索引数据；如下，可以通过定时脚本来实现。</p>
+<p>我们先写个删除15天前索引的脚本 <code>es-index-clear.sh</code>，如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span> /bin/bash</span><br><span class="line"><span class="meta">#</span> es-index-clear</span><br><span class="line"><span class="meta">#</span> 只保留15天内的日志索引</span><br><span class="line">LAST_DATA=`date -d "-15 days" "+%Y.%m.%d"`</span><br><span class="line"><span class="meta">#</span> 删除索引</span><br><span class="line">curl -XDELETE 'http://192.168.239.133:9200/*-'$&#123;LAST_DATA&#125;'*'</span><br></pre></td></tr></table></figure>
+
+<p>然后利用 <code>crontab</code> 去添加定时任务，首先执行 <code>crontab -e</code>，然后添加以下内容：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">0 1 * * * /opt/elk/es-index-clear.sh</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>该定时会在每天的凌晨1点执行，后面换成你自己脚本所在的绝对路径即可。</p>
+</blockquote>
+<p>可以执行 <code>tail -f /var/log/cron</code>，查看定时任务的日志。</p>
+<h2 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h2><p>我们新建一个 spring-boot 应用，添加 <code>logstash</code> 的依赖，如下：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>net.logstash.logback<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>logstash-logback-encoder<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>5.3<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>然后新建一个 <code>logback.xml</code> 放在 <code>resources</code> 目录下，内容如下：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span></span><br><span class="line"><span class="meta">&lt;!DOCTYPE configuration&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">configuration</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">include</span> <span class="attr">resource</span>=<span class="string">"org/springframework/boot/logging/logback/defaults.xml"</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">include</span> <span class="attr">resource</span>=<span class="string">"org/springframework/boot/logging/logback/console-appender.xml"</span>/&gt;</span></span><br><span class="line">    <span class="comment">&lt;!--应用名称--&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"APP_NAME"</span> <span class="attr">value</span>=<span class="string">"log"</span>/&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">&lt;!--输出到logstash的appender--&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">appender</span> <span class="attr">name</span>=<span class="string">"LOGSTASH"</span> <span class="attr">class</span>=<span class="string">"net.logstash.logback.appender.LogstashTcpSocketAppender"</span>&gt;</span></span><br><span class="line">        <span class="comment">&lt;!--可以访问的logstash日志收集端口--&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">destination</span>&gt;</span>192.168.239.131:4560<span class="tag">&lt;/<span class="name">destination</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">encoder</span> <span class="attr">charset</span>=<span class="string">"UTF-8"</span> <span class="attr">class</span>=<span class="string">"net.logstash.logback.encoder.LogstashEncoder"</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">appender</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">root</span> <span class="attr">level</span>=<span class="string">"INFO"</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">appender-ref</span> <span class="attr">ref</span>=<span class="string">"CONSOLE"</span>/&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">appender-ref</span> <span class="attr">ref</span>=<span class="string">"LOGSTASH"</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">root</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>接着编写一个定时任务，Java 代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@EnableScheduling</span></span><br><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">LogScheduler</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Logger log = LoggerFactory.getLogger(LogScheduler.class);</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Scheduled</span>(cron = <span class="string">" 0/30 * * * * ? "</span>)</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">doTiming</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        log.info(<span class="string">"ELK测试日志"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>该定时任务每30秒输出一条日志。</p>
+</blockquote>
+<p>最后我们查看 kibana 的界面就可以看到啦！</p>
+<p><img src="http://ww1.sinaimg.cn/large/006Vpl27ly1ge7i03qcflj31gq0o2n38.jpg" alt></p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>本次只是简单的搭建了 ELK，如果要在生成环境上使用，还需要做很多修改；例如，ES 开启安全认证，端口不可直接暴露在公网上，索引最好使用模板创建等。</p>
+<p>最后本篇文章的代码和 ELK 的配置文件，我都上传到 <a href="https://github.com/leisurexi/elk">https://github.com/leisurexi/elk</a>。<strong>访问新博客地址，观看效果更佳 <a href="https://leisurexi.github.io/" target="_blank" rel="noopener">https://leisurexi.github.io/</a></strong></p>
+<blockquote>
+<p>注意：Github 上的 <code>docker-compose.yml</code> 我是和在一起写的，文章中是分开写的，为了更清晰一点。 </p>
+</blockquote>
+
+    </article>
+    <!-- license  -->
+    
+        <div class="license-wrapper">
+            <p>原文作者：<a href="https://github.com/leisurexi">leisurexi</a>
+            <p>原文链接：<a href="https://github.com/leisurexi/category/2020/04/26/ELK/Docker 搭建ELK集群步骤.html">https://github.com/leisurexi/category/2020/04/26/ELK/Docker 搭建ELK集群步骤.html</a>
+            <p>发表日期：<a href="https://github.com/leisurexi/category/2020/04/26/ELK/Docker 搭建ELK集群步骤.html">April 26th 2020, 10:01:00 pm</a>
+            <p>更新日期：<a href="https://github.com/leisurexi/category/2020/04/26/ELK/Docker 搭建ELK集群步骤.html">April 26th 2020, 10:02:13 pm</a>
+            <p>版权声明：本文采用<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+        </div>
+    
+    <!-- paginator  -->
+    <ul class="post-paginator">
+        <li class="next">
+            
+        </li>
+        <li class="previous">
+            
+                <div class="prevSlogan">Previous Post</div>
+                <a href= "/category/2020/04/21/Spring IoC/Spring IoC getBean 方法详解.html" title= "Spring IoC getBean 方法详解">
+                    <div class="prevTitle">Spring IoC getBean 方法详解</div>
+                </a>
+            
+        </li>
+    </ul>
+    <!-- 评论插件 -->
+    <!-- 来必力City版安装代码 -->
+
+<!-- City版安装代码已完成 -->
+    
+    
+    <!-- partial('_partial/comment/changyan') -->
+    <!--PC版-->
+
+
+    
+    
+
+    <!-- 评论 -->
+</main>
+            <!-- profile -->
+            
+        </div>
+        <footer class="footer footer-unloaded">
+    <!-- social  -->
+    
+    <div class="social">
+        
+    
+        
+            
+                <a href="mailto:leisurexi@gmail.com" class="iconfont-archer email" title=email ></a>
+            
+        
+    
+        
+            
+                <a href="https://github.com/leisurexi" class="iconfont-archer github" target="_blank" title=github></a>
+            
+        
+    
+        
+            
+                <span class="iconfont-archer wechat" title=wechat>
+                  
+                  <img class="profile-qr" src="/assets/wechat.png" />
+                </span>
+            
+        
+    
+        
+            
+                <span class="iconfont-archer qq" title=qq>
+                  
+                  <img class="profile-qr" src="/assets/qq.png" />
+                </span>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+    </div>
+    
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- 不蒜子  -->
+    
+    <div class="busuanzi-container">
+    
+     
+    <span id="busuanzi_container_site_pv">PV: <span id="busuanzi_value_site_pv"></span> :)</span>
+    
+    </div>
+    
+</footer>
+    </div>
+    <!-- toc -->
+    
+    <div class="toc-wrapper" style=
+    
+
+
+
+
+
+
+
+top:50vh;
+
+    >
+        <div class="toc-catalog">
+            <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+        </div>
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#前言"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#正文"><span class="toc-number">2.</span> <span class="toc-text">正文</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#环境"><span class="toc-number">2.1.</span> <span class="toc-text">环境</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#系统设置"><span class="toc-number">2.2.</span> <span class="toc-text">系统设置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Elasticsearch-搭建"><span class="toc-number">2.3.</span> <span class="toc-text">Elasticsearch 搭建</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#主节点"><span class="toc-number">2.3.1.</span> <span class="toc-text">主节点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#数据节点"><span class="toc-number">2.3.2.</span> <span class="toc-text">数据节点</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Kibana-搭建"><span class="toc-number">2.4.</span> <span class="toc-text">Kibana 搭建</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#logstash-搭建"><span class="toc-number">2.5.</span> <span class="toc-text">logstash 搭建</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#定期删除索引"><span class="toc-number">2.6.</span> <span class="toc-text">定期删除索引</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#测试"><span class="toc-number">2.7.</span> <span class="toc-text">测试</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#总结"><span class="toc-number">3.</span> <span class="toc-text">总结</span></a></li></ol>
+    </div>
+    
+    <div class="back-top iconfont-archer">&#xe639;</div>
+    <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+          <div class="sidebar-panel-archives">
+    <!-- 在ejs中将archive按照时间排序 -->
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 21
+        </div>
+        <!-- search  -->
+        
+    </div>
+    
+    <div class="post-archive">
+    
+    
+    
+    
+    <div class="archive-year"> 2020 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/26</span><a class="archive-post-title" href= "/category/2020/04/26/ELK/Docker 搭建ELK集群步骤.html" >Docker 搭建 ELK 集群步骤</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/21</span><a class="archive-post-title" href= "/category/2020/04/21/Spring IoC/Spring IoC getBean 方法详解.html" >Spring IoC getBean 方法详解</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/14</span><a class="archive-post-title" href= "/category/2020/04/14/Spring IoC/Spring XML Bean 定义的加载和注册.html" >Spring XML Bean 定义的加载和注册</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/01</span><a class="archive-post-title" href= "/category/2020/02/01/JVM/Java虚拟机性能监控和故障处理工具.html" >Java虚拟机性能监控和故障处理工具</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/28</span><a class="archive-post-title" href= "/category/2020/01/28/JVM/JVM 类加载机制.html" >JVM 类加载机制</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/28</span><a class="archive-post-title" href= "/category/2020/01/28/JVM/JVM垃圾收集相关的常用参数.html" >JVM垃圾收集相关的常用参数</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/21</span><a class="archive-post-title" href= "/category/2020/01/21/MySQL/MySQL索引.html" >MySQL索引</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/18</span><a class="archive-post-title" href= "/category/2020/01/18/MySQL/MySQL EXPLAIN详解.html" >MySQL EXPLAIN详解</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/18</span><a class="archive-post-title" href= "/category/2020/01/18/MySQL/MySQL事务.html" >MySQL事务</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/13</span><a class="archive-post-title" href= "/category/2020/01/13/RabbitMQ/RabbitMQ镜像集群模式.html" >RabbitMQ镜像集群模式</a>
+        </li>
+    
+    
+    
+    
+    
+        </ul>
+    
+    <div class="archive-year"> 2019 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/28</span><a class="archive-post-title" href= "/category/2019/12/28/Redis/Redis Cluster.html" >Redis Cluster</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/28</span><a class="archive-post-title" href= "/category/2019/09/28/并发/线程池.html" >线程池</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/15</span><a class="archive-post-title" href= "/category/2019/08/15/集合/HashMap.html" >HashMap</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/10</span><a class="archive-post-title" href= "/category/2019/08/10/CentOS 7/CentOS 7下Zookeeper和Kafka集群搭建.html" >CentOS 7下Zookeeper和Kafka集群搭建</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/10</span><a class="archive-post-title" href= "/category/2019/08/10/CentOS 7/CentOS 7 下RabbitMQ 3.7 安装与配置.html" >CentOS 7下安装RabbitMQ 3.7</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/28</span><a class="archive-post-title" href= "/category/2019/05/28/集合/LinkedList.html" >LinkedList</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/26</span><a class="archive-post-title" href= "/category/2019/05/26/设计模式/单例模式.html" >单例模式</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/26</span><a class="archive-post-title" href= "/category/2019/05/26/设计模式/迭代器模式.html" >迭代器模式</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/18</span><a class="archive-post-title" href= "/category/2019/05/18/集合/ArrayList.html" >ArrayList</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/18</span><a class="archive-post-title" href= "/category/2019/05/18/集合/Collection.html" >Collection</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/16</span><a class="archive-post-title" href= "/category/2019/05/16/设计模式/备忘录模式.html" >备忘录模式</a>
+        </li>
+    
+    </div>
+  </div>
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+    
+        <span class="sidebar-tag-name" data-tags="CentOS 7"><span class="iconfont-archer">&#xe606;</span>CentOS 7</span>
+    
+        <span class="sidebar-tag-name" data-tags="JVM"><span class="iconfont-archer">&#xe606;</span>JVM</span>
+    
+        <span class="sidebar-tag-name" data-tags="设计模式"><span class="iconfont-archer">&#xe606;</span>设计模式</span>
+    
+        <span class="sidebar-tag-name" data-tags="MySQL"><span class="iconfont-archer">&#xe606;</span>MySQL</span>
+    
+        <span class="sidebar-tag-name" data-tags="RabbitMQ"><span class="iconfont-archer">&#xe606;</span>RabbitMQ</span>
+    
+        <span class="sidebar-tag-name" data-tags="并发"><span class="iconfont-archer">&#xe606;</span>并发</span>
+    
+        <span class="sidebar-tag-name" data-tags="集合"><span class="iconfont-archer">&#xe606;</span>集合</span>
+    
+        <span class="sidebar-tag-name" data-tags="ELK"><span class="iconfont-archer">&#xe606;</span>ELK</span>
+    
+        <span class="sidebar-tag-name" data-tags="Redis"><span class="iconfont-archer">&#xe606;</span>Redis</span>
+    
+        <span class="sidebar-tag-name" data-tags="Spring IoC"><span class="iconfont-archer">&#xe606;</span>Spring IoC</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+    缺失模块。<br/>
+    1、请确保node版本大于6.2<br/>
+    2、在博客根目录（注意不是archer根目录）执行以下命令：<br/>
+    <span style="color: #f75357; font-size: 1rem; line-height: 2rem;">npm i hexo-generator-json-content --save</span><br/>
+    3、在根目录_config.yml里添加配置：
+    <pre style="color: #787878; font-size: 0.6rem;">
+jsonContent:
+  meta: false
+  pages: false
+  posts:
+    title: true
+    date: true
+    path: true
+    text: false
+    raw: false
+    content: false
+    slug: false
+    updated: false
+    comments: false
+    link: false
+    permalink: false
+    excerpt: false
+    categories: true
+    tags: true</pre>
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    
+        <span class="sidebar-category-name" data-categories="CentOS-7"><span class="iconfont-archer">&#xe60a;</span>CentOS-7</span>
+    
+        <span class="sidebar-category-name" data-categories="JVM"><span class="iconfont-archer">&#xe60a;</span>JVM</span>
+    
+        <span class="sidebar-category-name" data-categories="设计模式"><span class="iconfont-archer">&#xe60a;</span>设计模式</span>
+    
+        <span class="sidebar-category-name" data-categories="MySQL"><span class="iconfont-archer">&#xe60a;</span>MySQL</span>
+    
+        <span class="sidebar-category-name" data-categories="RabbitMQ"><span class="iconfont-archer">&#xe60a;</span>RabbitMQ</span>
+    
+        <span class="sidebar-category-name" data-categories="并发"><span class="iconfont-archer">&#xe60a;</span>并发</span>
+    
+        <span class="sidebar-category-name" data-categories="集合"><span class="iconfont-archer">&#xe60a;</span>集合</span>
+    
+        <span class="sidebar-category-name" data-categories="ELK"><span class="iconfont-archer">&#xe60a;</span>ELK</span>
+    
+        <span class="sidebar-category-name" data-categories="Redis"><span class="iconfont-archer">&#xe60a;</span>Redis</span>
+    
+        <span class="sidebar-category-name" data-categories="Spring-IoC"><span class="iconfont-archer">&#xe60a;</span>Spring-IoC</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+    </div>
+</div> 
+    <script>
+    var siteMeta = {
+        root: "/",
+        author: "leisurexi"
+    }
+</script>
+    <!-- CDN failover -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ === 'undefined')
+        {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js">\x3C/script>')
+        }
+    </script>
+    <script src="/scripts/main.js"></script>
+    <!-- algolia -->
+    
+    <!-- busuanzi  -->
+    
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    
+    <!-- CNZZ  -->
+    
+    </div>
+    <!-- async load share.js -->
+    
+        <script src="/scripts/share.js" async></script>    
+     
+    <script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/assets/koharu.model.json"},"display":{"position":"left","width":150,"height":300,"hOffset":75},"mobile":{"show":true},"react":{"opacity":0.7},"log":false});</script></body>
+</html>
+
+
