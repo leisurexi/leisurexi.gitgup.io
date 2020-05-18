@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+    <!-- title -->
+
+
+
+
+<!-- keywords -->
+
+
+
+
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="author" content="leisurexi">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="leisurexi">
+    
+    <meta name="keywords" content="hexo,hexo-theme,hexo-blog">
+    
+    <meta name="description" content="此行一入深似海，从此红尘是路人。">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>CentOS 7下Zookeeper和Kafka集群搭建 · leisurexi&#39;s Blog</title>
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .back-top,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(-45deg, #444 0, #444 80px, #333 80px, #333 160px);
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s infinite;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+
+</style>
+
+    <link rel="preload" href="/css/style.css?v=20180824" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="stylesheet" href="/css/mobile.css?v=20180824" media="(max-width: 980px)">
+    
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+(function( w ){
+	"use strict";
+	// rel=preload support test
+	if( !w.loadCSS ){
+		w.loadCSS = function(){};
+	}
+	// define on the loadCSS obj
+	var rp = loadCSS.relpreload = {};
+	// rel=preload feature support test
+	// runs once and returns a function for compat purposes
+	rp.support = (function(){
+		var ret;
+		try {
+			ret = w.document.createElement( "link" ).relList.supports( "preload" );
+		} catch (e) {
+			ret = false;
+		}
+		return function(){
+			return ret;
+		};
+	})();
+
+	// if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+	// then change that media back to its intended value on load
+	rp.bindMediaToggle = function( link ){
+		// remember existing media attr for ultimate state, or default to 'all'
+		var finalMedia = link.media || "all";
+
+		function enableStylesheet(){
+			link.media = finalMedia;
+		}
+
+		// bind load handlers to enable media
+		if( link.addEventListener ){
+			link.addEventListener( "load", enableStylesheet );
+		} else if( link.attachEvent ){
+			link.attachEvent( "onload", enableStylesheet );
+		}
+
+		// Set rel and non-applicable media type to start an async request
+		// note: timeout allows this to happen async to let rendering continue in IE
+		setTimeout(function(){
+			link.rel = "stylesheet";
+			link.media = "only x";
+		});
+		// also enable media after 3 seconds,
+		// which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+		setTimeout( enableStylesheet, 3000 );
+	};
+
+	// loop through link elements in DOM
+	rp.poly = function(){
+		// double check this to prevent external calls from running
+		if( rp.support() ){
+			return;
+		}
+		var links = w.document.getElementsByTagName( "link" );
+		for( var i = 0; i < links.length; i++ ){
+			var link = links[ i ];
+			// qualify links to those with rel=preload and as=style attrs
+			if( link.rel === "preload" && link.getAttribute( "as" ) === "style" && !link.getAttribute( "data-loadcss" ) ){
+				// prevent rerunning on link
+				link.setAttribute( "data-loadcss", true );
+				// bind listeners to toggle media back
+				rp.bindMediaToggle( link );
+			}
+		}
+	};
+
+	// if unsupported, run the polyfill
+	if( !rp.support() ){
+		// run once at least
+		rp.poly();
+
+		// rerun poly on an interval until onload
+		var run = w.setInterval( rp.poly, 500 );
+		if( w.addEventListener ){
+			w.addEventListener( "load", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		} else if( w.attachEvent ){
+			w.attachEvent( "onload", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		}
+	}
+
+
+	// commonjs
+	if( typeof exports !== "undefined" ){
+		exports.loadCSS = loadCSS;
+	}
+	else {
+		w.loadCSS = loadCSS;
+	}
+}( typeof global !== "undefined" ? global : this ) );
+</script>
+
+    <link rel="icon" href="/assets/favicon.ico">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js" as="script">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js" as="script">
+    <link rel="preload" href="/scripts/main.js" as="script">
+    <link rel="preload" as="font" href="/font/Oswald-Regular.ttf" crossorigin>
+    <link rel="preload" as="font" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" crossorigin>
+    
+    <!-- fancybox -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" defer></script>
+    <!-- 百度统计  -->
+    
+    <!-- 谷歌统计  -->
+    
+</head>
+
+    
+        <body class="post-body">
+    
+    
+<header class="header">
+
+    <div class="read-progress"></div>
+    <div class="header-sidebar-menu">&#xe775;</div>
+    <!-- post页的toggle banner  -->
+    
+    <div class="banner">
+            <div class="blog-title">
+                <a href="/" >leisurexi&#39;s Blog.</a>
+            </div>
+            <div class="post-title">
+                <a href="#" class="post-name">CentOS 7下Zookeeper和Kafka集群搭建</a>
+            </div>
+    </div>
+    
+    <a class="home-link" href=/>leisurexi's Blog.</a>
+</header>
+    <div class="wrapper">
+        <div class="site-intro" style="
+
+
+
+
+
+
+
+height:50vh;
+">
+    
+    <!-- 主页  -->
+    
+    
+    <!-- 404页  -->
+            
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(/intro/post-bg.jpg)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+            
+            CentOS 7下Zookeeper和Kafka集群搭建
+            <!-- 404 -->
+            
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            
+            
+            <!-- 404 -->
+            
+        </p>
+        <!-- 文章页meta -->
+        
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                
+                    <div class= post-intro-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "CentOS 7,Zookeeper,Kafka">CentOS 7,Zookeeper,Kafka</a>
+    
+</div>
+                
+                
+                    <div class="post-intro-read">
+                        <span>字数统计: <span class="post-count word-count">1.9k</span>阅读时长: <span class="post-count reading-time">9 min</span></span>
+                    </div>
+                
+                <div class="post-intro-meta">
+                    <span class="post-intro-calander iconfont-archer">&#xe676;</span>
+                    <span class="post-intro-time">2020/05/18</span>
+                    
+                    <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                        <span class="iconfont-archer">&#xe602;</span>
+                        <span id="busuanzi_value_page_pv"></span>
+                    </span>
+                    
+                    <span class="shareWrapper">
+                        <span class="iconfont-archer shareIcon">&#xe71d;</span>
+                        <span class="shareText">Share</span>
+                        <ul class="shareList">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+        
+    </div>
+</div>
+        <script>
+ 
+  // get user agent
+  var browser = {
+    versions: function () {
+      var u = window.navigator.userAgent;
+      return {
+        userAgent: u,
+        trident: u.indexOf('Trident') > -1, //IE内核
+        presto: u.indexOf('Presto') > -1, //opera内核
+        webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+        gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+        mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+        ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+        android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+        iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+        iPad: u.indexOf('iPad') > -1, //是否为iPad
+        webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+        weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+        uc: u.indexOf('UCBrowser') > -1 //是否为android下的UC浏览器
+      };
+    }()
+  }
+  console.log("userAgent:" + browser.versions.userAgent);
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded');
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document.getElementsByClassName('intro-title')[0].classList.add('intro-fade-in');
+      document.getElementsByClassName('intro-subtitle')[0].classList.add('intro-fade-in');
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in');
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb(){
+    if (browser.versions.uc) {
+      console.log("UCBrowser");
+      fontLoaded();
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular']
+        },
+        loading: function () {  //所有字体开始加载
+          // console.log('loading');
+        },
+        active: function () {  //所有字体已渲染
+          fontLoaded();
+        },
+        inactive: function () { //字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout');
+          fontLoaded();
+        },
+        timeout: 5000 // Set the timeout to two seconds
+      });
+    }
+  }
+
+  function asyncErr(){
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (cb) { o.addEventListener('load', function (e) { cb(null, e); }, false); }
+    if (err) { o.addEventListener('error', function (e) { err(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+
+  var asyncLoadWithFallBack = function(arr, success, reject) {
+      var currReject = function(){
+        reject()
+        arr.shift()
+        if(arr.length)
+          async(arr[0], success, currReject)
+        }
+
+      async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack([
+    "https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js", 
+    "https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js",
+    "/lib/webfontloader.min.js"
+  ], asyncCb, asyncErr)
+</script>        
+        <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
+        <div class="container container-unloaded">
+            <main class="main post-page">
+    <article class="article-entry">
+        <p>本篇文章主要介绍在 CentOS 7 环境下搭建 Zookeeper和 Kafka 集群。</p>
+<a id="more"></a>
+
+<h1 id="环境"><a href="#环境" class="headerlink" title="环境"></a>环境</h1><ul>
+<li>CentOS 7.4</li>
+<li>Zookeeper-3.6.1</li>
+<li>Kafka_2.13-2.4.1</li>
+<li>Kafka-manager-2.0.0.2</li>
+</ul>
+<p>本次安装的软件全部在 <code>/home/javateam</code> 目录下。</p>
+<h1 id="Zookeeper-集群搭建"><a href="#Zookeeper-集群搭建" class="headerlink" title="Zookeeper 集群搭建"></a>Zookeeper 集群搭建</h1><ol>
+<li>添加三台机器的 <code>hosts</code>，使用 <code>vim /etc/hosts</code> 命令添加以下内容：</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">192.168.30.78 node-78</span><br><span class="line">192.168.30.79 node-79</span><br><span class="line">192.168.30.80 node-80</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>首先解压缩：</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tar -zxvf apache-zookeeper-3.6.1-bin.tar.gz</span><br></pre></td></tr></table></figure>
+
+<p>修改文件夹名称：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mv apache-zookeeper-3.6.1-bin.tar.gz zookeeper</span><br></pre></td></tr></table></figure>
+
+<ol start="4">
+<li>向 <code>/etc/profile</code> 配置文件添加以下内容，并执行<code>source /etc/profile</code>命令使配置生效：</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">export ZOOKEEPER_HOME=/home/javateam/zookeeper</span><br><span class="line">export PATH=$PATH:$ZOOKEEPER_HOME/bin</span><br></pre></td></tr></table></figure>
+
+<ol start="5">
+<li>在上面配置文件中 <code>dataDir</code> 的目录下创建一个 <code>myid</code> 文件，并写入一个数值，比如0。<code>myid</code> 文件里存放的是服务器的编号。</li>
+<li>修改zookeeper配置文件。首先进入 <code>$ZOOKEEPER_HOME/conf</code> 目录，复制一份 <code>zoo_sample.cfg</code> 并将名称修改为 <code>zoo.cfg</code>:</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span> zookeeper服务器心跳时间，单位为ms</span><br><span class="line">tickTime=2000</span><br><span class="line"><span class="meta">#</span> 投票选举新leader的初始化时间</span><br><span class="line">initLimit=10</span><br><span class="line"><span class="meta">#</span> leader与follower心跳检测最大容忍时间，响应超过 syncLimit * tickTime，leader认为follower死掉，从服务器列表删除follower</span><br><span class="line">syncLimit=5</span><br><span class="line"><span class="meta">#</span> 数据目录</span><br><span class="line">dataDir=/home/javateam/zookeeper/data/</span><br><span class="line"><span class="meta">#</span> 日志目录</span><br><span class="line">dataLogDir=/home/javateam/zookeeper/logs/</span><br><span class="line"><span class="meta">#</span> 对外服务的端口</span><br><span class="line">clientPort=2181</span><br><span class="line"><span class="meta">#</span> 集群ip配置</span><br><span class="line">server.78=node-78:2888:3888</span><br><span class="line">server.79=node-79:2888:3888</span><br><span class="line">server.80=node-80:2888:3888</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>注意: 上面配置文件中的数据目录和日志目录需自行去创建对应的文件夹。这里server后的数字，与myid文件中的id是一致的。</p>
+</blockquote>
+<ol start="7">
+<li>zookeeper启动会占用三个端口，分别的作用是:</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">2181：对cline端提供服务</span><br><span class="line">3888：选举leader使用</span><br><span class="line">2888：集群内机器通讯使用（Leader监听此端口）</span><br></pre></td></tr></table></figure>
+
+<p>记得使用以下命令开启防火墙端口，并重启防火墙：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">firewall-cmd --zone=public --add-port=2181/tcp --permanent</span><br><span class="line">firewall-cmd --zone=public --add-port=3888/tcp --permanent</span><br><span class="line">firewall-cmd --zone=public --add-port=2888/tcp --permanent</span><br><span class="line">firewall-cmd --reload</span><br></pre></td></tr></table></figure>
+
+<ol start="8">
+<li>然后用 <code>zkServer.sh start</code> 分别启动三台机器上的zookeeper，启动后用 <code>zkServer.sh status</code> 查看状态，如下图所以有一个leader两个follower即代表成功：</li>
+</ol>
+<p><img src="http://ww1.sinaimg.cn/large/006Vpl27ly1geqwzuvdfsj30n006odhf.jpg" alt="WeChatfc81462212a55ba049b1afa06c9fabef.png"></p>
+<p><img src="http://ww1.sinaimg.cn/large/006Vpl27ly1geqx0hkdzrj30my06g75v.jpg" alt="WeChat4d789c67638c5fc635fb2cc149d218c2.png"></p>
+<p><img src="http://ww1.sinaimg.cn/large/006Vpl27ly1geqx11miguj30mw06o0uc.jpg" alt="WeChatbfe38654fcccfcb45aba87c0fd2a4d58.png"></p>
+<h1 id="Kafka-集群搭建"><a href="#Kafka-集群搭建" class="headerlink" title="Kafka 集群搭建"></a>Kafka 集群搭建</h1><ol>
+<li>首先解压缩：</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tar -zxvf kafka_2.13-2.4.1.tgz</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>改文件夹名称：</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mv kafka_2.13-2.4.1.tgz kafka</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>向 <code>/etc/profile</code> 配置文件添加以下内容，并执行<code>source /etc/profile</code>命令使配置生效：</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">export KAFKA_HOME=/home/javateam/kafka</span><br><span class="line">export PATH=$PATH:$KAFKA_HOME/bin</span><br></pre></td></tr></table></figure>
+
+<ol start="4">
+<li>JVM级别参数调优，修改 <code>kafka/bin/kafka-server-start.sh</code>，添加以下内容：</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span> 调整堆大小，默认1G太小了</span><br><span class="line">export KAFKA_HEAP_OPTS="-Xmx6G -Xms6G"</span><br><span class="line"><span class="meta">#</span> 选用G1垃圾收集器</span><br><span class="line">export KAFKA_JVM_PERFORMANCE_OPTS="-server -XX:+UseG1GC -XX:MaxGCPauseMillis=20 -XX:InitiatingHeapOccupancyPercent=35 -XX:+ExplicitGCInvokesConcurrent -Djava.awt.headless=true"</span><br><span class="line"><span class="meta">#</span> 指定JMX暴露端口</span><br><span class="line">export JMX_PORT="8999"</span><br></pre></td></tr></table></figure>
+
+<p>添加后，文件内容如下图所示：</p>
+<p><img src="http://ww1.sinaimg.cn/large/006Vpl27ly1geqx9qzyzdj31bi0wihdt.jpg" alt="WeChat9d9de8b4d35d8483d8920db2bd98f524.png"></p>
+<ol start="5">
+<li>操作系统级别参数调优，增加文件描述符的限制，使用 <code>vim  /etc/security/limits.conf</code> 添加以下内容：</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">*  soft  nofile  100000</span><br><span class="line">*  hard  nofile  100000</span><br><span class="line">*  soft  nproc   65535</span><br><span class="line">*  hard  nproc   65535</span><br></pre></td></tr></table></figure>
+
+<ol start="6">
+<li>修改kafka的配置文件 <code>$KAFKA_HOME/conf/server.properties</code>，如下：</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span>############################ Server Basics #############################</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 每一个broker在集群中的唯一标示，要求是正数。在改变IP地址，不改变broker.id的话不会影响consumers</span><br><span class="line">broker.id=78</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span>############################ Socket Server Settings #############################</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 提供给客户端响应的地址和端口</span><br><span class="line">listeners=PLAINTEXT://node-78:9092</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> broker 处理消息的最大线程数</span><br><span class="line">num.network.threads=3</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> broker处理磁盘IO的线程数 ，数值应该大于你的硬盘数</span><br><span class="line">num.io.threads=8</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> socket的发送缓冲区大小</span><br><span class="line">socket.send.buffer.bytes=102400</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> socket的接收缓冲区，socket的调优参数SO_SNDBUFF</span><br><span class="line">socket.receive.buffer.bytes=102400</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> socket请求的最大数值，防止serverOOM，message.max.bytes必然要小于socket.request.max.bytes，会被topic创建时的指定参数覆盖</span><br><span class="line">socket.request.max.bytes=104857600</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span>############################ Log Basics #############################</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> kafka数据的存放地址，多个地址的话用逗号分割</span><br><span class="line">log.dirs=/home/javateam/kafka/logs</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 每个topic的分区个数，若是在topic创建时候没有指定的话会被topic创建时的指定参数覆盖</span><br><span class="line">num.partitions=3</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 每个分区的副本数</span><br><span class="line">replication.factor=2</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 我们知道segment文件默认会被保留7天的时间，超时的话就会被清理，那么清理这件事情就需要有一些线程来做。这里就是用来设置恢复和清理data下数据的线程数量</span><br><span class="line">num.recovery.threads.per.data.dir=1</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span>############################ Internal Topic Settings  #############################</span><br><span class="line"><span class="meta">#</span> The replication factor for the group metadata internal topics "__consumer_offsets" and "__transaction_state"</span><br><span class="line"><span class="meta">#</span> For anything other than development testing, a value greater than 1 is recommended to ensure availability such as 3.</span><br><span class="line">offsets.topic.replication.factor=1</span><br><span class="line">transaction.state.log.replication.factor=1</span><br><span class="line">transaction.state.log.min.isr=1</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span>############################ Log Flush Policy #############################</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> Messages are immediately written to the filesystem but by default we only fsync() to sync</span><br><span class="line"><span class="meta">#</span> the OS cache lazily. The following configurations control the flush of data to disk.</span><br><span class="line"><span class="meta">#</span> There are a few important trade-offs here:</span><br><span class="line"><span class="meta">#</span>    1. Durability: Unflushed data may be lost if you are not using replication.</span><br><span class="line"><span class="meta">#</span>    2. Latency: Very large flush intervals may lead to latency spikes when the flush does occur as there will be a lot of data to flush.</span><br><span class="line"><span class="meta">#</span>    3. Throughput: The flush is generally the most expensive operation, and a small flush interval may lead to excessive seeks.</span><br><span class="line"><span class="meta">#</span> The settings below allow one to configure the flush policy to flush data after a period of time or</span><br><span class="line"><span class="meta">#</span> every N messages (or both). This can be done globally and overridden on a per-topic basis.</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> The number of messages to accept before forcing a flush of data to disk</span><br><span class="line"><span class="meta">#</span>log.flush.interval.messages=10000</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> The maximum amount of time a message can sit in a log before we force a flush</span><br><span class="line"><span class="meta">#</span>log.flush.interval.ms=1000</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span>############################ Log Retention Policy #############################</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 控制一条消息数据被保存多长时间，默认是7天</span><br><span class="line">log.retention.hours=168</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 指定Broker为消息保存的总磁盘容量大小，-1代表不限制</span><br><span class="line">log.retention.bytes=-1</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> Broker能处理的最大消息大小，默认976KB(1000012)，此处改为100MB</span><br><span class="line">message.max.bytes=104857600</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 日志文件中每个segment的大小，默认为1G</span><br><span class="line">log.segment.bytes=1073741824</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span>上面的参数设置了每一个segment文件的大小是1G，那么就需要有一个东西去定期检查segment文件有没有达到1G，多长时间去检查一次，就需要设置一个周期性检查文件大小的时间（单位是毫秒）。</span><br><span class="line">log.retention.check.interval.ms=300000</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span>############################ Zookeeper #############################</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 消费者集群通过连接Zookeeper来找到broker。zookeeper连接服务器地址</span><br><span class="line">zookeeper.connect=node-78:2181,node-79:2181,node-80:2181</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> Timeout in ms for connecting to zookeeper</span><br><span class="line">zookeeper.connection.timeout.ms=6000</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span>############################ Group Coordinator Settings #############################</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> The following configuration specifies the time, in milliseconds, that the GroupCoordinator will delay the initial consumer rebalance.</span><br><span class="line"><span class="meta">#</span> The rebalance will be further delayed by the value of group.initial.rebalance.delay.ms as new members join the group, up to a maximum of max.poll.interval.ms.</span><br><span class="line"><span class="meta">#</span> The default value for this is 3 seconds.</span><br><span class="line"><span class="meta">#</span> We override this to 0 here as it makes for a better out-of-the-box experience for development and testing.</span><br><span class="line"><span class="meta">#</span> However, in production environments the default value of 3 seconds is more suitable as this will help to avoid unnecessary, and potentially expensive, rebalances during application startup.</span><br><span class="line">group.initial.rebalance.delay.ms=0</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span>############################ Broker Settings #############################</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 不让落后太多的副本竞选Leader</span><br><span class="line">unclean.leader.election.enable=false</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 关闭kafka定期对一些topic分区进行Leader重选举</span><br><span class="line">auto.leader.rebalance.enable=false</span><br></pre></td></tr></table></figure>
+
+<ol start="7">
+<li>编写kafka启动脚本，<code>vim startup.sh</code> 内容如下所示：</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span> 进程守护模式启动kafka</span><br><span class="line">kafka-server-start.sh -daemon /home/javateam/kafka/config/server.properties</span><br></pre></td></tr></table></figure>
+
+<ol start="8">
+<li>编写kafka停止脚本，<code>vim shutdown.sh</code> 内容如下所示：</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span> 停止kafka服务</span><br><span class="line">kafka-server-stop.sh</span><br></pre></td></tr></table></figure>
+
+<ol start="9">
+<li>用如下命令，分别启动kafka服务：</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sh /home/javateam/kafka/startup.sh</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>注意：后面的路径换成你自己脚本所在的路径。</p>
+</blockquote>
+<ol start="10">
+<li>启动成功后，连接zookeeper查看节点 <code>ids</code> 信息：</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">zkCli.sh -server 127.0.0.1:2181</span><br><span class="line">ls /brokers/ids</span><br></pre></td></tr></table></figure>
+
+<p>如下图所示，代表集群搭建成功：</p>
+<p><img src="http://ww1.sinaimg.cn/large/006Vpl27ly1geqy2tkbixj30ju020wev.jpg" alt="WeChatc5943d73fa0fd92c1a66962147af7afd.png"></p>
+<h1 id="Kafka-manager-搭建"><a href="#Kafka-manager-搭建" class="headerlink" title="Kafka-manager 搭建"></a>Kafka-manager 搭建</h1><ol>
+<li>首先解压缩：</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">unzip kafka-manager-2.0.0.2.zip</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>改文件夹名称</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mv kafka-manager-2.0.0.2.zip kafka-manager</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>修改配置文件 <code>kafka-manager/conf/application.conf</code>，把里面的 <code>kafka-manager.zkhosts</code> 换成你自己的zookeeper 集群地址就好了，例如：<code>kafka-manager.zkhosts=&quot;node-78:2181,node-79:2181,node-80:2181&quot;</code></li>
+<li>编写 kafka-manager 启动脚本，<code>vim startup.sh</code> 内容如下：</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nohup /home/javateam/kafka-manager/bin/kafka-manager -Dhttp.port=9000 &gt; /home/javateam/kafka-manager/nohup.out 2&gt;&amp;1 &amp;</span><br></pre></td></tr></table></figure>
+
+<ol start="5">
+<li>使用 <code>sh /home/javateam/kafka-manager/startup.sh</code> 启动 kafka-manager，然后访问9000端口，如下图所示代表成功：</li>
+</ol>
+<p><img src="http://ww1.sinaimg.cn/large/006Vpl27ly1geqyb0c4c5j31ng0jg775.jpg" alt="WeChatcf5d42bbb563a7b23864ed6755ce9c0d.png"></p>
+<p>不知道怎么使用的话就去 google，这里不再赘述。</p>
+
+    </article>
+    <!-- license  -->
+    
+        <div class="license-wrapper">
+            <p>原文作者：<a href="https://github.com/leisurexi">leisurexi</a>
+            <p>原文链接：<a href="https://github.com/leisurexi/category/2020/05/18/CentOS 7/CentOS 7搭建Zookeeper和Kafka集群.html">https://github.com/leisurexi/category/2020/05/18/CentOS 7/CentOS 7搭建Zookeeper和Kafka集群.html</a>
+            <p>发表日期：<a href="https://github.com/leisurexi/category/2020/05/18/CentOS 7/CentOS 7搭建Zookeeper和Kafka集群.html">May 18th 2020, 10:57:00 pm</a>
+            <p>更新日期：<a href="https://github.com/leisurexi/category/2020/05/18/CentOS 7/CentOS 7搭建Zookeeper和Kafka集群.html">May 18th 2020, 10:58:27 pm</a>
+            <p>版权声明：本文采用<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+        </div>
+    
+    <!-- paginator  -->
+    <ul class="post-paginator">
+        <li class="next">
+            
+        </li>
+        <li class="previous">
+            
+                <div class="prevSlogan">Previous Post</div>
+                <a href= "/category/2020/04/26/ELK/Docker 搭建ELK集群步骤.html" title= "Docker 搭建 ELK 集群步骤">
+                    <div class="prevTitle">Docker 搭建 ELK 集群步骤</div>
+                </a>
+            
+        </li>
+    </ul>
+    <!-- 评论插件 -->
+    <!-- 来必力City版安装代码 -->
+
+<!-- City版安装代码已完成 -->
+    
+    
+    <!-- partial('_partial/comment/changyan') -->
+    <!--PC版-->
+
+
+    
+    
+
+    <!-- 评论 -->
+</main>
+            <!-- profile -->
+            
+        </div>
+        <footer class="footer footer-unloaded">
+    <!-- social  -->
+    
+    <div class="social">
+        
+    
+        
+            
+                <a href="mailto:leisurexi@gmail.com" class="iconfont-archer email" title=email ></a>
+            
+        
+    
+        
+            
+                <a href="https://github.com/leisurexi" class="iconfont-archer github" target="_blank" title=github></a>
+            
+        
+    
+        
+            
+                <span class="iconfont-archer wechat" title=wechat>
+                  
+                  <img class="profile-qr" src="/assets/wechat.png" />
+                </span>
+            
+        
+    
+        
+            
+                <span class="iconfont-archer qq" title=qq>
+                  
+                  <img class="profile-qr" src="/assets/qq.png" />
+                </span>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+    </div>
+    
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- 不蒜子  -->
+    
+    <div class="busuanzi-container">
+    
+     
+    <span id="busuanzi_container_site_pv">PV: <span id="busuanzi_value_site_pv"></span> :)</span>
+    
+    </div>
+    
+</footer>
+    </div>
+    <!-- toc -->
+    
+    <div class="toc-wrapper" style=
+    
+
+
+
+
+
+
+
+top:50vh;
+
+    >
+        <div class="toc-catalog">
+            <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+        </div>
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#环境"><span class="toc-number">1.</span> <span class="toc-text">环境</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Zookeeper-集群搭建"><span class="toc-number">2.</span> <span class="toc-text">Zookeeper 集群搭建</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Kafka-集群搭建"><span class="toc-number">3.</span> <span class="toc-text">Kafka 集群搭建</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Kafka-manager-搭建"><span class="toc-number">4.</span> <span class="toc-text">Kafka-manager 搭建</span></a></li></ol>
+    </div>
+    
+    <div class="back-top iconfont-archer">&#xe639;</div>
+    <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+          <div class="sidebar-panel-archives">
+    <!-- 在ejs中将archive按照时间排序 -->
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 21
+        </div>
+        <!-- search  -->
+        
+    </div>
+    
+    <div class="post-archive">
+    
+    
+    
+    
+    <div class="archive-year"> 2020 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/18</span><a class="archive-post-title" href= "/category/2020/05/18/CentOS 7/CentOS 7搭建Zookeeper和Kafka集群.html" >CentOS 7下Zookeeper和Kafka集群搭建</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/26</span><a class="archive-post-title" href= "/category/2020/04/26/ELK/Docker 搭建ELK集群步骤.html" >Docker 搭建 ELK 集群步骤</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/21</span><a class="archive-post-title" href= "/category/2020/04/21/Spring IoC/Spring IoC getBean 方法详解.html" >Spring IoC getBean 方法详解</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/14</span><a class="archive-post-title" href= "/category/2020/04/14/Spring IoC/Spring XML Bean 定义的加载和注册.html" >Spring XML Bean 定义的加载和注册</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/01</span><a class="archive-post-title" href= "/category/2020/02/01/JVM/Java虚拟机性能监控和故障处理工具.html" >Java虚拟机性能监控和故障处理工具</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/28</span><a class="archive-post-title" href= "/category/2020/01/28/JVM/JVM 类加载机制.html" >JVM 类加载机制</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/28</span><a class="archive-post-title" href= "/category/2020/01/28/JVM/JVM垃圾收集相关的常用参数.html" >JVM垃圾收集相关的常用参数</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/21</span><a class="archive-post-title" href= "/category/2020/01/21/MySQL/MySQL索引.html" >MySQL索引</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/18</span><a class="archive-post-title" href= "/category/2020/01/18/MySQL/MySQL EXPLAIN详解.html" >MySQL EXPLAIN详解</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/18</span><a class="archive-post-title" href= "/category/2020/01/18/MySQL/MySQL事务.html" >MySQL事务</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/13</span><a class="archive-post-title" href= "/category/2020/01/13/RabbitMQ/RabbitMQ镜像集群模式.html" >RabbitMQ镜像集群模式</a>
+        </li>
+    
+    
+    
+    
+    
+        </ul>
+    
+    <div class="archive-year"> 2019 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/28</span><a class="archive-post-title" href= "/category/2019/12/28/Redis/Redis Cluster.html" >Redis Cluster</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/28</span><a class="archive-post-title" href= "/category/2019/09/28/并发/线程池.html" >线程池</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/15</span><a class="archive-post-title" href= "/category/2019/08/15/集合/HashMap.html" >HashMap</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/10</span><a class="archive-post-title" href= "/category/2019/08/10/CentOS 7/CentOS 7 下RabbitMQ 3.7 安装与配置.html" >CentOS 7下安装RabbitMQ 3.7</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/28</span><a class="archive-post-title" href= "/category/2019/05/28/集合/LinkedList.html" >LinkedList</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/26</span><a class="archive-post-title" href= "/category/2019/05/26/设计模式/单例模式.html" >单例模式</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/26</span><a class="archive-post-title" href= "/category/2019/05/26/设计模式/迭代器模式.html" >迭代器模式</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/18</span><a class="archive-post-title" href= "/category/2019/05/18/集合/ArrayList.html" >ArrayList</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/18</span><a class="archive-post-title" href= "/category/2019/05/18/集合/Collection.html" >Collection</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/16</span><a class="archive-post-title" href= "/category/2019/05/16/设计模式/备忘录模式.html" >备忘录模式</a>
+        </li>
+    
+    </div>
+  </div>
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+    
+        <span class="sidebar-tag-name" data-tags="JVM"><span class="iconfont-archer">&#xe606;</span>JVM</span>
+    
+        <span class="sidebar-tag-name" data-tags="CentOS 7"><span class="iconfont-archer">&#xe606;</span>CentOS 7</span>
+    
+        <span class="sidebar-tag-name" data-tags="CentOS 7,Zookeeper,Kafka"><span class="iconfont-archer">&#xe606;</span>CentOS 7,Zookeeper,Kafka</span>
+    
+        <span class="sidebar-tag-name" data-tags="MySQL"><span class="iconfont-archer">&#xe606;</span>MySQL</span>
+    
+        <span class="sidebar-tag-name" data-tags="RabbitMQ"><span class="iconfont-archer">&#xe606;</span>RabbitMQ</span>
+    
+        <span class="sidebar-tag-name" data-tags="设计模式"><span class="iconfont-archer">&#xe606;</span>设计模式</span>
+    
+        <span class="sidebar-tag-name" data-tags="并发"><span class="iconfont-archer">&#xe606;</span>并发</span>
+    
+        <span class="sidebar-tag-name" data-tags="集合"><span class="iconfont-archer">&#xe606;</span>集合</span>
+    
+        <span class="sidebar-tag-name" data-tags="ELK"><span class="iconfont-archer">&#xe606;</span>ELK</span>
+    
+        <span class="sidebar-tag-name" data-tags="Redis"><span class="iconfont-archer">&#xe606;</span>Redis</span>
+    
+        <span class="sidebar-tag-name" data-tags="Spring IoC"><span class="iconfont-archer">&#xe606;</span>Spring IoC</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+    缺失模块。<br/>
+    1、请确保node版本大于6.2<br/>
+    2、在博客根目录（注意不是archer根目录）执行以下命令：<br/>
+    <span style="color: #f75357; font-size: 1rem; line-height: 2rem;">npm i hexo-generator-json-content --save</span><br/>
+    3、在根目录_config.yml里添加配置：
+    <pre style="color: #787878; font-size: 0.6rem;">
+jsonContent:
+  meta: false
+  pages: false
+  posts:
+    title: true
+    date: true
+    path: true
+    text: false
+    raw: false
+    content: false
+    slug: false
+    updated: false
+    comments: false
+    link: false
+    permalink: false
+    excerpt: false
+    categories: true
+    tags: true</pre>
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    
+        <span class="sidebar-category-name" data-categories="JVM"><span class="iconfont-archer">&#xe60a;</span>JVM</span>
+    
+        <span class="sidebar-category-name" data-categories="CentOS-7"><span class="iconfont-archer">&#xe60a;</span>CentOS-7</span>
+    
+        <span class="sidebar-category-name" data-categories="CentOS-7-Zookeeper-Kafka"><span class="iconfont-archer">&#xe60a;</span>CentOS-7-Zookeeper-Kafka</span>
+    
+        <span class="sidebar-category-name" data-categories="MySQL"><span class="iconfont-archer">&#xe60a;</span>MySQL</span>
+    
+        <span class="sidebar-category-name" data-categories="RabbitMQ"><span class="iconfont-archer">&#xe60a;</span>RabbitMQ</span>
+    
+        <span class="sidebar-category-name" data-categories="设计模式"><span class="iconfont-archer">&#xe60a;</span>设计模式</span>
+    
+        <span class="sidebar-category-name" data-categories="并发"><span class="iconfont-archer">&#xe60a;</span>并发</span>
+    
+        <span class="sidebar-category-name" data-categories="集合"><span class="iconfont-archer">&#xe60a;</span>集合</span>
+    
+        <span class="sidebar-category-name" data-categories="ELK"><span class="iconfont-archer">&#xe60a;</span>ELK</span>
+    
+        <span class="sidebar-category-name" data-categories="Redis"><span class="iconfont-archer">&#xe60a;</span>Redis</span>
+    
+        <span class="sidebar-category-name" data-categories="Spring-IoC"><span class="iconfont-archer">&#xe60a;</span>Spring-IoC</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+    </div>
+</div> 
+    <script>
+    var siteMeta = {
+        root: "/",
+        author: "leisurexi"
+    }
+</script>
+    <!-- CDN failover -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ === 'undefined')
+        {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js">\x3C/script>')
+        }
+    </script>
+    <script src="/scripts/main.js"></script>
+    <!-- algolia -->
+    
+    <!-- busuanzi  -->
+    
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    
+    <!-- CNZZ  -->
+    
+    </div>
+    <!-- async load share.js -->
+    
+        <script src="/scripts/share.js" async></script>    
+     
+    <script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/assets/koharu.model.json"},"display":{"position":"left","width":150,"height":300,"hOffset":75},"mobile":{"show":true},"react":{"opacity":0.7},"log":false});</script></body>
+</html>
+
+
